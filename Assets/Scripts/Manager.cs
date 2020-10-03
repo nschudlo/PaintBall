@@ -7,8 +7,10 @@ public class Manager : MonoBehaviour
     public GameObject boundingBoxPrefab;
     public GameObject ballPrefab;
 
-    private Stack<GameObject> balls = new Stack<GameObject>();
-    private const float BALL_DELAY = 0.5f;
+    private GameObject ball;
+    private const float DISTANCE_TO_MOVE = 50;
+    private const float MAX_SPEED = 4000;
+    private const float FORCE_SPEED_RATIO = 200;
 
     void Start()
     {
@@ -43,39 +45,54 @@ public class Manager : MonoBehaviour
             .sprite = Utility.createSprite(
                 Camera.main.pixelWidth, Camera.main.pixelHeight, Color.black
             );
-
-        // Add the initial ball
-        StartCoroutine("SetupInitialBall");   
     }
+
+    Vector2 mouseStartPos;
+    Vector2 mousePrevPos;
 
     /**
      * Listen for mouse presses to add or remove balls.
      */
     void Update()
     {
+        // Take note of the starting position
         if(Input.GetKeyDown(KeyCode.Mouse0)) {
-            CreateNewBall(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-        } else if(Input.GetKeyDown(KeyCode.Mouse1)) {
-            if(balls.Count > 1) {
-                Destroy(balls.Pop());
+            mouseStartPos = Input.mousePosition;
+            mousePrevPos = mouseStartPos;
+            
+        // Start the ball if the mouse is down
+        } else if(Input.GetKey(KeyCode.Mouse0)) {
+            if(ball == null) { 
+                Vector2 mouseCurrPos = Input.mousePosition;
+                // Check if mouse has moved outside the desired bounds
+                float distance = Mathf.Abs(Vector2.Distance(mouseStartPos, mouseCurrPos));
+                
+                if(distance > DISTANCE_TO_MOVE) {
+                    Vector2 startPos = Camera.main.ScreenToWorldPoint(mouseStartPos);
+                    // Create the ball
+                    ball = Instantiate(
+                        ballPrefab, 
+                        startPos, 
+                        Quaternion.identity
+                    );
+                    
+                    // Limit the speed
+                    float speed = Mathf.Abs(Vector2.Distance(mousePrevPos, mouseCurrPos))/Time.deltaTime;
+                    speed = Mathf.Clamp(speed, 0, MAX_SPEED);
+                    Debug.Log(speed);
+
+                    // Add the force to the ball
+                    Vector2 force = (mouseCurrPos - mouseStartPos) * (speed / FORCE_SPEED_RATIO);
+                    ball.GetComponent<Ball>().Init(force);
+                }
+                mousePrevPos = mouseCurrPos;
             }
+
+        // Stop the ball on mouse up
+        } else if(Input.GetKeyUp(KeyCode.Mouse0)) {
+            mouseStartPos = Vector2.zero;
+            Destroy(ball);
+            ball = null;
         }
-    }
-
-    /**
-     * Add a single ball to the scene after a delay.
-     */
-    IEnumerator SetupInitialBall() {
-        yield return new WaitForSeconds(BALL_DELAY);
-        CreateNewBall(Vector2.zero);
-    }
-
-    /**
-     * Create a new ball and put it in the scene.
-     * @param pos
-     */
-    private void CreateNewBall(Vector2 pos) {
-        GameObject newBall = Instantiate(ballPrefab, pos, Quaternion.identity);
-        balls.Push(newBall);
     }
 }

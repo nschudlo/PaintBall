@@ -13,28 +13,19 @@ public class Ball : MonoBehaviour
     private Rigidbody2D ballRigidBody;
     private SpriteRenderer paintRenderer;
 
-    void Start()
+    void Awake()
     {
         paintRenderer = GameObject.FindGameObjectWithTag("Paint").GetComponent<SpriteRenderer>();
         ballRenderer = GetComponent<SpriteRenderer>();
         ballRigidBody = GetComponent<Rigidbody2D>();
-
-        StartCoroutine("MoveAndDraw");
-    }
-
-    void Update() {
-        if(Input.GetKeyDown(KeyCode.Space)) {
-            Restart();
-        }
     }
 
     /**
-     * Stop the ball and start it up again.
+     * Initialize the ball.
+     * @param force
      */
-    public void Restart() {
-        StopCoroutine("MoveAndDraw");
-        ballRigidBody.velocity = Vector3.zero;
-        ballRigidBody.angularVelocity = 0f;
+    public void Init(Vector2 force) {
+        ballRigidBody.AddForce(force);
         StartCoroutine("MoveAndDraw");
     }
 
@@ -42,13 +33,9 @@ public class Ball : MonoBehaviour
      * Add a force to the ball and drag dots periodically.
      */
     IEnumerator MoveAndDraw() {
-        float verticalForce = Random.Range(-10, 10);
-        float horizontalForce = Random.Range(-10, 10);
-        ballRigidBody.AddForce(new Vector2(verticalForce * 50, horizontalForce * 50));
 
         while(true) {
             int index = colorIdx++ % colors.Length;
-            // ballRenderer.color = colors[index];
             
             // Figure out the ball position on the background
             int ballX = (int)((transform.position.x * Utility.PIXELS_PER_UNIT) + (Screen.width / 2));
