@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Manager : MonoBehaviour
@@ -44,7 +45,7 @@ public class Manager : MonoBehaviour
             );
 
         // Add the initial ball
-        CreateNewBall(Vector2.zero);       
+        StartCoroutine("SetupInitialBall");   
     }
 
     /**
@@ -59,6 +60,14 @@ public class Manager : MonoBehaviour
                 Destroy(balls.Pop());
             }
         }
+    }
+
+    /**
+     * Add a single ball to the scene after a delay.
+     */
+    IEnumerator SetupInitialBall() {
+        yield return new WaitForSeconds(BALL_DELAY);
+        CreateNewBall(Vector2.zero);
     }
 
     /**
