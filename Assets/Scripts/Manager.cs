@@ -8,29 +8,35 @@ public class Manager : MonoBehaviour
     public GameObject ballPrefab;
 
     private GameObject ball;
+    private const float BOUNDING_BOX_WIDTH = 0.1f;
     private const float DISTANCE_TO_MOVE = 50;
     private const float MAX_SPEED = 4000;
     private const float FORCE_SPEED_RATIO = 200;
+
+    private Vector2 mouseStartPos;
+    private Vector2 mousePrevPos;
 
     void Start()
     {
         float width = Screen.width;
         float height = Screen.height;
         float halfWidth = width / 2f / Utility.PIXELS_PER_UNIT;
+        float halfHeight = height / 2f / Utility.PIXELS_PER_UNIT;
 
         // Setup the bounding box
-        GameObject leftBox = Instantiate(boundingBoxPrefab, new Vector3(-halfWidth, 0, 0), Quaternion.identity);
-        leftBox.transform.localScale = new Vector3(0.1f, (float)(height / Utility.PIXELS_PER_UNIT), 1);
+        float sideXPos = halfWidth + (BOUNDING_BOX_WIDTH/2f);
+        GameObject leftBox = Instantiate(boundingBoxPrefab, new Vector3(-sideXPos, 0, 0), Quaternion.identity);
+        leftBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, (float)(height / Utility.PIXELS_PER_UNIT), 1);
 
-        GameObject rightBox = Instantiate(boundingBoxPrefab, new Vector3(halfWidth, 0, 0), Quaternion.identity);
-        rightBox.transform.localScale = new Vector3(0.1f, (float)(height / Utility.PIXELS_PER_UNIT), 1);
+        GameObject rightBox = Instantiate(boundingBoxPrefab, new Vector3(sideXPos, 0, 0), Quaternion.identity);
+        rightBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, (float)(height / Utility.PIXELS_PER_UNIT), 1);
 
-        float halfHeight = height / 2f / Utility.PIXELS_PER_UNIT;
-        GameObject topBox = Instantiate(boundingBoxPrefab, new Vector3(0, halfHeight, 0), Quaternion.identity);
-        topBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), 0.1f, 1);
+        float yPos = halfHeight + (BOUNDING_BOX_WIDTH/2f);
+        GameObject topBox = Instantiate(boundingBoxPrefab, new Vector3(0, yPos, 0), Quaternion.identity);
+        topBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), BOUNDING_BOX_WIDTH, 1);
 
-        GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -halfHeight, 0), Quaternion.identity);
-        bottomBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), 0.1f, 1);
+        GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -yPos, 0), Quaternion.identity);
+        bottomBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), BOUNDING_BOX_WIDTH, 1);
 
         // Setup the paintable background sprite
         GameObject.FindGameObjectWithTag("Paint")
@@ -47,15 +53,12 @@ public class Manager : MonoBehaviour
             );
     }
 
-    Vector2 mouseStartPos;
-    Vector2 mousePrevPos;
-
     /**
      * Listen for mouse presses to add or remove balls.
      */
     void Update()
     {
-        // Take note of the starting position
+        // Take note of the mouse starting position
         if(Input.GetKeyDown(KeyCode.Mouse0)) {
             mouseStartPos = Input.mousePosition;
             mousePrevPos = mouseStartPos;
@@ -78,8 +81,7 @@ public class Manager : MonoBehaviour
                     
                     // Limit the speed
                     float speed = Mathf.Abs(Vector2.Distance(mousePrevPos, mouseCurrPos))/Time.deltaTime;
-                    speed = Mathf.Clamp(speed, 0, MAX_SPEED);
-                    Debug.Log(speed);
+                    // speed = Mathf.Clamp(speed, 0, MAX_SPEED);
 
                     // Add the force to the ball
                     Vector2 force = (mouseCurrPos - mouseStartPos) * (speed / FORCE_SPEED_RATIO);
