@@ -14,6 +14,7 @@ public class Ball : MonoBehaviour
         Color.blue, Color.red, Color.green, Color.yellow, Color.magenta
     };
     private const int DOT_WIDTH = 20;
+    private const float LERP_STEPS = 5;
 
     // Position on the most recent draw
     private Vector2 previousDrawPos;
@@ -50,19 +51,23 @@ public class Ball : MonoBehaviour
 
         // Draw another dot if enough distance has 
         if(Mathf.Abs(Vector2.Distance(previousDrawPos, currentPos)) > 0.1) {
+            for(float x=0; x < 1; x += (1f/LERP_STEPS)) {
+                Vector2 pos = Vector2.Lerp(previousDrawPos, transform.position, x);
+                DrawDot(pos);
+            }
             previousDrawPos = transform.position;
-            DrawDot();
         }
     }
 
     /**
-     * Draw a dot at the current position
+     * Draw a dot at a position
+     * @param pos
      */
-    private void DrawDot() {                    
+    private void DrawDot(Vector2 pos) {                    
         Texture2D bgTexture = paintRenderer.sprite.texture;
 
         // Get the ball position on the paint layer
-        Vector2 ballPos = Camera.main.WorldToScreenPoint(transform.position);
+        Vector2 ballPos = Camera.main.WorldToScreenPoint(pos);
         int ballX = (int)(ballPos.x * bgTexture.width / Camera.main.pixelWidth);
         int ballY = (int)(ballPos.y * bgTexture.height / Camera.main.pixelHeight);
 
