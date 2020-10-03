@@ -11,13 +11,11 @@ public class Ball : MonoBehaviour
 
     private SpriteRenderer ballRenderer;
     private Rigidbody2D ballRigidBody;
-    private SpriteRenderer bgRenderer;
-
-    private const float PIXELS_PER_UNIT = 100;
+    private SpriteRenderer paintRenderer;
 
     void Start()
     {
-        bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<SpriteRenderer>();
+        paintRenderer = GameObject.FindGameObjectWithTag("Paint").GetComponent<SpriteRenderer>();
         ballRenderer = GetComponent<SpriteRenderer>();
         ballRigidBody = GetComponent<Rigidbody2D>();
 
@@ -51,13 +49,13 @@ public class Ball : MonoBehaviour
 
         while(true) {
             int index = colorIdx++ % colors.Length;
-            ballRenderer.color = colors[index];
+            // ballRenderer.color = colors[index];
             
             // Figure out the ball position on the background
-            int ballX = (int)((transform.position.x * PIXELS_PER_UNIT) + (Screen.width / 2));
-            int ballY = (int)((transform.position.y * PIXELS_PER_UNIT) + (Screen.height / 2));
+            int ballX = (int)((transform.position.x * Utility.PIXELS_PER_UNIT) + (Screen.width / 2));
+            int ballY = (int)((transform.position.y * Utility.PIXELS_PER_UNIT) + (Screen.height / 2));
 
-            Texture2D bgTexture = bgRenderer.sprite.texture;
+            Texture2D bgTexture = paintRenderer.sprite.texture;
 
             // Draw a dot at that position
             int width = Random.Range(5,10);

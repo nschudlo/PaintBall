@@ -7,39 +7,40 @@ public class Manager : MonoBehaviour
     public GameObject ballPrefab;
 
     private Queue<GameObject> balls = new Queue<GameObject>();
-    private const float PIXELS_PER_UNIT = 100f;
 
-    /**
-     * Setup the bounding box.
-     */
     void Start()
     {
         float width = Screen.width;
         float height = Screen.height;
-        float halfWidth = width / 2f / PIXELS_PER_UNIT;
+        float halfWidth = width / 2f / Utility.PIXELS_PER_UNIT;
+
+        // Setup the bounding box
         GameObject leftBox = Instantiate(boundingBoxPrefab, new Vector3(-halfWidth, 0, 0), Quaternion.identity);
-        leftBox.transform.localScale = new Vector3(0.1f, (float)(height / PIXELS_PER_UNIT), 1);
+        leftBox.transform.localScale = new Vector3(0.1f, (float)(height / Utility.PIXELS_PER_UNIT), 1);
 
         GameObject rightBox = Instantiate(boundingBoxPrefab, new Vector3(halfWidth, 0, 0), Quaternion.identity);
-        rightBox.transform.localScale = new Vector3(0.1f, (float)(height / PIXELS_PER_UNIT), 1);
+        rightBox.transform.localScale = new Vector3(0.1f, (float)(height / Utility.PIXELS_PER_UNIT), 1);
 
-        float halfHeight = height / 2f / PIXELS_PER_UNIT;
+        float halfHeight = height / 2f / Utility.PIXELS_PER_UNIT;
         GameObject topBox = Instantiate(boundingBoxPrefab, new Vector3(0, halfHeight, 0), Quaternion.identity);
-        topBox.transform.localScale = new Vector3((float)(width / PIXELS_PER_UNIT), 0.1f, 1);
+        topBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), 0.1f, 1);
 
         GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -halfHeight, 0), Quaternion.identity);
-        bottomBox.transform.localScale = new Vector3((float)(width / PIXELS_PER_UNIT), 0.1f, 1);
+        bottomBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), 0.1f, 1);
 
-        // Setup the texture and sprite for the background
-        SpriteRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<SpriteRenderer>();
-        Texture2D bgTexture = new Texture2D(Camera.main.pixelWidth, Camera.main.pixelHeight);
-        Sprite bgSprite = Sprite.Create(
-            bgTexture, 
-            new Rect(0.0f, 0.0f, bgTexture.width, bgTexture.height), 
-            new Vector2(0.5f, 0.5f),
-            PIXELS_PER_UNIT
-        );
-        bgRenderer.sprite = bgSprite;
+        // Setup the paintable background sprite
+        GameObject.FindGameObjectWithTag("Paint")
+            .GetComponent<SpriteRenderer>()
+            .sprite = Utility.createSprite(
+                Camera.main.pixelWidth, Camera.main.pixelHeight, Color.clear
+            );
+
+        // Setup the static background sprite
+        GameObject.FindGameObjectWithTag("Background")
+            .GetComponent<SpriteRenderer>()
+            .sprite = Utility.createSprite(
+                Camera.main.pixelWidth, Camera.main.pixelHeight, Color.black
+            );        
     }
 
     /**
