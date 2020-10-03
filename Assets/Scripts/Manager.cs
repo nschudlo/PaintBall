@@ -18,38 +18,40 @@ public class Manager : MonoBehaviour
 
     void Start()
     {
-        float width = Screen.width;
-        float height = Screen.height;
-        float halfWidth = width / 2f / Utility.PIXELS_PER_UNIT;
-        float halfHeight = height / 2f / Utility.PIXELS_PER_UNIT;
+        float screenAspect = (float)Screen.width / (float)Screen.height;
+        float horizontal = Camera.main.orthographicSize * screenAspect;
+        float vertical = Camera.main.orthographicSize;
 
         // Setup the bounding box
-        float sideXPos = halfWidth + (BOUNDING_BOX_WIDTH/2f);
-        GameObject leftBox = Instantiate(boundingBoxPrefab, new Vector3(-sideXPos, 0, 0), Quaternion.identity);
-        leftBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, (float)(height / Utility.PIXELS_PER_UNIT), 1);
+        float xPos = horizontal + (BOUNDING_BOX_WIDTH/2f);
+        GameObject leftBox = Instantiate(boundingBoxPrefab, new Vector3(-xPos, 0, 0), Quaternion.identity);
+        leftBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical*2, 1);
 
-        GameObject rightBox = Instantiate(boundingBoxPrefab, new Vector3(sideXPos, 0, 0), Quaternion.identity);
-        rightBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, (float)(height / Utility.PIXELS_PER_UNIT), 1);
+        GameObject rightBox = Instantiate(boundingBoxPrefab, new Vector3(xPos, 0, 0), Quaternion.identity);
+        rightBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical*2, 1);
 
-        float yPos = halfHeight + (BOUNDING_BOX_WIDTH/2f);
+        float yPos = vertical + (BOUNDING_BOX_WIDTH/2f);
         GameObject topBox = Instantiate(boundingBoxPrefab, new Vector3(0, yPos, 0), Quaternion.identity);
-        topBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), BOUNDING_BOX_WIDTH, 1);
+        topBox.transform.localScale = new Vector3(horizontal*2, BOUNDING_BOX_WIDTH, 1);
 
         GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -yPos, 0), Quaternion.identity);
-        bottomBox.transform.localScale = new Vector3((float)(width / Utility.PIXELS_PER_UNIT), BOUNDING_BOX_WIDTH, 1);
+        bottomBox.transform.localScale = new Vector3(horizontal*2, BOUNDING_BOX_WIDTH, 1);
+
+        float bgWidth = horizontal*2*Utility.PIXELS_PER_UNIT;
+        float bgHeight = vertical*2*Utility.PIXELS_PER_UNIT;
 
         // Setup the paintable background sprite
         GameObject.FindGameObjectWithTag("Paint")
             .GetComponent<SpriteRenderer>()
             .sprite = Utility.createSprite(
-                Camera.main.pixelWidth, Camera.main.pixelHeight, Color.clear
+                (int)bgWidth, (int)bgHeight, Color.clear
             );
 
         // Setup the static background sprite
         GameObject.FindGameObjectWithTag("Background")
             .GetComponent<SpriteRenderer>()
             .sprite = Utility.createSprite(
-                Camera.main.pixelWidth, Camera.main.pixelHeight, Color.black
+                (int)bgWidth, (int)bgHeight, Color.black
             );
     }
 
