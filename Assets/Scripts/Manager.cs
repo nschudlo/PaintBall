@@ -6,7 +6,8 @@ public class Manager : MonoBehaviour
     public GameObject boundingBoxPrefab;
     public GameObject ballPrefab;
 
-    private Queue<GameObject> balls = new Queue<GameObject>();
+    private Stack<GameObject> balls = new Stack<GameObject>();
+    private const float BALL_DELAY = 0.5f;
 
     void Start()
     {
@@ -40,7 +41,10 @@ public class Manager : MonoBehaviour
             .GetComponent<SpriteRenderer>()
             .sprite = Utility.createSprite(
                 Camera.main.pixelWidth, Camera.main.pixelHeight, Color.black
-            );        
+            );
+
+        // Add the initial ball
+        CreateNewBall(Vector2.zero);       
     }
 
     /**
@@ -49,12 +53,20 @@ public class Manager : MonoBehaviour
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.Mouse0)) {
-            GameObject newBall = Instantiate(ballPrefab, Vector3.zero, Quaternion.identity);
-            balls.Enqueue(newBall);
+            CreateNewBall(Camera.main.ScreenToWorldPoint(Input.mousePosition));
         } else if(Input.GetKeyDown(KeyCode.Mouse1)) {
-            if(balls.Count > 0) {
-                Destroy(balls.Dequeue());
+            if(balls.Count > 1) {
+                Destroy(balls.Pop());
             }
         }
+    }
+
+    /**
+     * Create a new ball and put it in the scene.
+     * @param pos
+     */
+    private void CreateNewBall(Vector2 pos) {
+        GameObject newBall = Instantiate(ballPrefab, pos, Quaternion.identity);
+        balls.Push(newBall);
     }
 }

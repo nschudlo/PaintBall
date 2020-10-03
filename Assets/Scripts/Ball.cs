@@ -19,8 +19,7 @@ public class Ball : MonoBehaviour
         ballRenderer = GetComponent<SpriteRenderer>();
         ballRigidBody = GetComponent<Rigidbody2D>();
 
-        Restart();
-        StartCoroutine("MoveAndDrag");
+        StartCoroutine("MoveAndDraw");
     }
 
     void Update() {
@@ -33,16 +32,16 @@ public class Ball : MonoBehaviour
      * Stop the ball and start it up again.
      */
     public void Restart() {
-        StopCoroutine("MoveAndDrag");
+        StopCoroutine("MoveAndDraw");
         ballRigidBody.velocity = Vector3.zero;
         ballRigidBody.angularVelocity = 0f;
-        StartCoroutine("MoveAndDrag");
+        StartCoroutine("MoveAndDraw");
     }
 
     /**
      * Add a force to the ball and drag dots periodically.
      */
-    IEnumerator MoveAndDrag() {
+    IEnumerator MoveAndDraw() {
         float verticalForce = Random.Range(-10, 10);
         float horizontalForce = Random.Range(-10, 10);
         ballRigidBody.AddForce(new Vector2(verticalForce * 50, horizontalForce * 50));
