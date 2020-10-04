@@ -39,10 +39,12 @@ public class Ball : MonoBehaviour
 
         // Draw another dot if enough distance has 
         if(Mathf.Abs(Vector2.Distance(previousDrawPos, currentPos)) > 0.1) {
-            for(float x=0; x < 1; x += (1f/LERP_STEPS)) {
+            Texture2D bgTexture = paintRenderer.sprite.texture;
+            for (float x=0; x < 1; x += (1f/LERP_STEPS)) {
                 Vector2 pos = Vector2.Lerp(previousDrawPos, transform.position, x);
-                DrawDot(pos);
+                DrawDot(bgTexture, pos);
             }
+            bgTexture.Apply();
             previousDrawPos = transform.position;
         }
     }
@@ -51,8 +53,7 @@ public class Ball : MonoBehaviour
      * Draw a dot at a position
      * @param pos
      */
-    private void DrawDot(Vector2 pos) {                    
-        Texture2D bgTexture = paintRenderer.sprite.texture;
+    private void DrawDot(Texture2D bgTexture, Vector2 pos) {
         Color color = colorsQueue.Dequeue();
 
         // Get the ball position on the paint layer
@@ -80,8 +81,6 @@ public class Ball : MonoBehaviour
                 bgTexture.SetPixel(bgX, bgY, color);
             }
         }
-
-        bgTexture.Apply();
         colorsQueue.Enqueue(color);
     }
 }
