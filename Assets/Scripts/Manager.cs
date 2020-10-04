@@ -15,11 +15,17 @@ public class Manager : MonoBehaviour
     private Vector2 mouseStartPos;
     private Vector2 mousePrevPos;
 
+    private float screenAspect;
+    private float horizontal;
+    private float vertical;
+    private float bgWidth;
+    private float bgHeight;
+
     void Start()
     {
-        float screenAspect = (float)Screen.width / (float)Screen.height;
-        float horizontal = Camera.main.orthographicSize * screenAspect;
-        float vertical = Camera.main.orthographicSize;
+        screenAspect = (float)Screen.width / (float)Screen.height;
+        horizontal = Camera.main.orthographicSize * screenAspect;
+        vertical = Camera.main.orthographicSize;
 
         // Setup the bounding box
         float xPos = horizontal + (BOUNDING_BOX_WIDTH/2f);
@@ -36,21 +42,28 @@ public class Manager : MonoBehaviour
         GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -yPos, 0), Quaternion.identity);
         bottomBox.transform.localScale = new Vector3(horizontal*2, BOUNDING_BOX_WIDTH, 1);
 
-        float bgWidth = horizontal*2*Utility.PIXELS_PER_UNIT;
-        float bgHeight = vertical*2*Utility.PIXELS_PER_UNIT;
-
-        // Setup the paintable background sprite
-        GameObject.FindGameObjectWithTag("Paint")
-            .GetComponent<SpriteRenderer>()
-            .sprite = Utility.createSprite(
-                (int)bgWidth, (int)bgHeight, Color.clear
-            );
+        bgWidth = horizontal*2*Utility.PIXELS_PER_UNIT;
+        bgHeight = vertical*2*Utility.PIXELS_PER_UNIT;
 
         // Setup the static background sprite
         GameObject.FindGameObjectWithTag("Background")
             .GetComponent<SpriteRenderer>()
             .sprite = Utility.createSprite(
                 (int)bgWidth, (int)bgHeight, Color.black
+            );
+
+        // Setup the paintable background sprite
+        ResetPaintLayer();
+    }
+
+    /**
+     * Wipe the paint layer
+     */
+    private void ResetPaintLayer() {
+        GameObject.FindGameObjectWithTag("Paint")
+            .GetComponent<SpriteRenderer>()
+            .sprite = Utility.createSprite(
+                (int)bgWidth, (int)bgHeight, Color.clear
             );
     }
 
@@ -59,6 +72,10 @@ public class Manager : MonoBehaviour
      */
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Space)) {
+            ResetPaintLayer();
+        }
+
         // Take note of the mouse starting position
         if(Input.GetKeyDown(KeyCode.Mouse0)) {
             mouseStartPos = Input.mousePosition;

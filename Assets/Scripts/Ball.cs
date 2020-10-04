@@ -34,7 +34,7 @@ public class Ball : MonoBehaviour
         ballRigidBody.AddForce(force);
     }
 
-    private void Update() {
+    private void FixedUpdate() {
         Vector2 currentPos = transform.position;
 
         // Draw another dot if enough distance has 
