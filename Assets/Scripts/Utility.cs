@@ -13,7 +13,7 @@ public class Utility
      */
     static public Sprite createSprite(int width, int height, Color color) {
         Texture2D texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
-        Utility.setTextureColor(texture, color);
+        setTextureColor(texture, color);
 
         return Sprite.Create(
             texture, 

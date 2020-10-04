@@ -6,6 +6,7 @@ public class Manager : MonoBehaviour
 {
     public GameObject boundingBoxPrefab;
     public GameObject ballPrefab;
+    public GameObject instructions;
 
     private GameObject ball;
     private const float BOUNDING_BOX_WIDTH = 0.1f;
@@ -53,18 +54,32 @@ public class Manager : MonoBehaviour
             );
 
         // Setup the paintable background sprite
-        ResetPaintLayer();
+        GameObject.FindGameObjectWithTag("Paint")
+            .GetComponent<SpriteRenderer>()
+            .sprite = Utility.createSprite(
+                (int)bgWidth, (int)bgHeight, Color.clear
+            );
+        
+        // Remove instructions so they aren't always there
+        Invoke("RemoveInstructions", 10);
     }
 
     /**
      * Wipe the paint layer
      */
     private void ResetPaintLayer() {
-        GameObject.FindGameObjectWithTag("Paint")
-            .GetComponent<SpriteRenderer>()
-            .sprite = Utility.createSprite(
-                (int)bgWidth, (int)bgHeight, Color.clear
-            );
+        Utility.setTextureColor(
+            GameObject.FindGameObjectWithTag("Paint")
+            .GetComponent<SpriteRenderer>().sprite.texture,
+            Color.clear
+        );
+    }
+
+    /**
+     * This message will self descruct in 3...2...1...
+     */
+    private void RemoveInstructions() {
+        Destroy(instructions);
     }
 
     /**
