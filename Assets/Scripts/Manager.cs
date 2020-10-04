@@ -10,7 +10,6 @@ public class Manager : MonoBehaviour
     private GameObject ball;
     private const float BOUNDING_BOX_WIDTH = 0.1f;
     private const float DISTANCE_TO_MOVE = 50;
-    private const float MAX_SPEED = 5000;
     private const float FORCE_SPEED_RATIO = 200;
 
     private Vector2 mouseStartPos;
@@ -83,7 +82,6 @@ public class Manager : MonoBehaviour
                     
                     // Limit the speed
                     float speed = Mathf.Abs(Vector2.Distance(mousePrevPos, mouseCurrPos))/Time.deltaTime;
-                    // speed = Mathf.Clamp(speed, 0, MAX_SPEED);
 
                     // Add the force to the ball
                     Vector2 force = (mouseCurrPos - mouseStartPos) * (speed / FORCE_SPEED_RATIO);

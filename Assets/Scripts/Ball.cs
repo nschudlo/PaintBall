@@ -8,12 +8,10 @@ public class Ball : MonoBehaviour
     private Rigidbody2D ballRigidBody;
     private SpriteRenderer paintRenderer;
 
-    // Queue of color pixels to cycle through   
-    private Queue<Color[]> colorPixels;
-    private Color[] COLORS = {
+    // Queue of colors to cycle through
+    private Queue<Color> colorsQueue = new Queue<Color>(new []{ 
         Color.blue, Color.red, Color.green, Color.yellow, Color.magenta
-    };
-    private const int DOT_WIDTH = 20;
+    });
     private const float LERP_STEPS = 5;
 
     // Position on the most recent draw
@@ -26,16 +24,6 @@ public class Ball : MonoBehaviour
         ballRigidBody = GetComponent<Rigidbody2D>();
 
         previousDrawPos = transform.position;
-
-        // Initialize the color pixel arrays
-        colorPixels = new Queue<Color[]>();
-        foreach(Color color in COLORS) {
-            Color[] pixels = new Color[DOT_WIDTH*DOT_WIDTH];
-            for(int idx=0; idx < DOT_WIDTH*DOT_WIDTH; idx++) {
-                pixels[idx] = color;
-            }
-            colorPixels.Enqueue(pixels);
-        }
     }
 
     /**
@@ -65,24 +53,35 @@ public class Ball : MonoBehaviour
      */
     private void DrawDot(Vector2 pos) {                    
         Texture2D bgTexture = paintRenderer.sprite.texture;
+        Color color = colorsQueue.Dequeue();
 
         // Get the ball position on the paint layer
         Vector2 ballPos = Camera.main.WorldToScreenPoint(pos);
         int ballX = (int)(ballPos.x * bgTexture.width / Camera.main.pixelWidth);
         int ballY = (int)(ballPos.y * bgTexture.height / Camera.main.pixelHeight);
 
-        // Draw a dot at that position
-        Color[] pixels = colorPixels.Dequeue();
+        Texture2D ballTexture = ballRenderer.sprite.texture;
+        int startX = ballX - (ballTexture.width / 2);
+        int startY = ballY - (ballTexture.height / 2);
+        for(int x=0; x<ballTexture.width; x++) {
+            for(int y=0; y<ballTexture.height; y++) {
+                int bgX = startX + x;
+                int bgY = startY + y;
+                // Don't draw outside of background texture
+                if(bgX < 0 || bgY < 0 || bgX >= bgTexture.width || bgY >= bgTexture.height) {
+                    continue;
+                }
+                
+                // Ignore clear pixels
+                if (ballTexture.GetPixel(x, y).a == 0) {
+                    continue;
+                }
 
-        int startX = Mathf.Clamp(ballX - (DOT_WIDTH/2), 0, bgTexture.width);
-        int startY = Mathf.Clamp(ballY - (DOT_WIDTH/2), 0, bgTexture.height);
-        int width = Mathf.Min(DOT_WIDTH, bgTexture.width-startX);
-        int height = Mathf.Min(DOT_WIDTH, bgTexture.height-startY);
-        bgTexture.SetPixels(
-            startX, startY, width, height, pixels
-        );
-        colorPixels.Enqueue(pixels);
+                bgTexture.SetPixel(bgX, bgY, color);
+            }
+        }
 
-        bgTexture.Apply();           
+        bgTexture.Apply();
+        colorsQueue.Enqueue(color);
     }
 }
