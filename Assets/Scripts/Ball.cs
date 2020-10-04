@@ -10,7 +10,7 @@ public class Ball : MonoBehaviour
 
     // Queue of colors to cycle through
     private Queue<Color> colorsQueue = new Queue<Color>(new []{ 
-        Color.blue, Color.red, Color.green, Color.yellow, Color.magenta
+        Color.blue, Color.green, Color.yellow, Color.red, Color.magenta
     });
     private const float LERP_STEPS = 5;
 
