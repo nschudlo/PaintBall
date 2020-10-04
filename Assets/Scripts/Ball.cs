@@ -73,12 +73,13 @@ public class Ball : MonoBehaviour
 
         // Draw a dot at that position
         Color[] pixels = colorPixels.Dequeue();
+
+        int startX = Mathf.Clamp(ballX - (DOT_WIDTH/2), 0, bgTexture.width);
+        int startY = Mathf.Clamp(ballY - (DOT_WIDTH/2), 0, bgTexture.height);
+        int width = Mathf.Min(DOT_WIDTH, bgTexture.width-startX);
+        int height = Mathf.Min(DOT_WIDTH, bgTexture.height-startY);
         bgTexture.SetPixels(
-            ballX - (DOT_WIDTH/2), 
-            ballY - (DOT_WIDTH/2), 
-            DOT_WIDTH, 
-            DOT_WIDTH, 
-            pixels
+            startX, startY, width, height, pixels
         );
         colorPixels.Enqueue(pixels);
 
