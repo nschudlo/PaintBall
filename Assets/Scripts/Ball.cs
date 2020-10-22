@@ -12,7 +12,9 @@ public class Ball : MonoBehaviour
     private Queue<Color> colorsQueue = new Queue<Color>(new []{ 
         Color.blue, Color.green, Color.yellow, Color.red, Color.magenta
     });
-    private const float LERP_STEPS = 5;
+
+    // The number of balls to be drawn per second
+    private const float BALLS_PER_SECOND = 200f;
 
     // Position on the most recent draw
     private Vector2 previousDrawPos;
@@ -35,18 +37,30 @@ public class Ball : MonoBehaviour
     }
 
     private void FixedUpdate() {
-        Vector2 currentPos = transform.position;
+        DrawDots(transform.position);
+    }
 
-        // Draw another dot if enough distance has 
-        if(Mathf.Abs(Vector2.Distance(previousDrawPos, currentPos)) > 0.1) {
-            Texture2D bgTexture = paintRenderer.sprite.texture;
-            for (float x=0; x < 1; x += (1f/LERP_STEPS)) {
-                Vector2 pos = Vector2.Lerp(previousDrawPos, transform.position, x);
-                DrawDot(bgTexture, pos);
-            }
-            bgTexture.Apply();
-            previousDrawPos = transform.position;
+    private void OnCollisionEnter2D(Collision2D collision) {
+        // Draw the dots to the contact position. This
+        // makes sure dots are drawn right up to the wall.
+        DrawDots(collision.contacts[0].point);   
+    }
+
+    /**
+     * Draw dots to fill in the positions from the most
+     * recently drawn dot to the targetPos.
+     * @param targetPos
+     */
+    private void DrawDots(Vector3 targetPos) {
+        float steps = Time.deltaTime * BALLS_PER_SECOND;
+        Texture2D bgTexture = paintRenderer.sprite.texture;
+        for (float t=0; t < 1; t += (1f/steps)) {
+            Vector2 pos = Vector2.Lerp(previousDrawPos, targetPos, t);
+            DrawDot(bgTexture, pos);
         }
+
+        bgTexture.Apply();
+        previousDrawPos = targetPos;
     }
 
     /**
