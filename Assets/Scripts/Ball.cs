@@ -1,9 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
+    // The number of balls to be drawn per second
+    private const float BALLS_PER_SECOND = 200f;
+
+    // The minimum time to wait before calling draw
+    // again. This doesn't prevent drawing dots when
+    // the ball collides with the walls.
+    private const float TIME_BETWEEN_DRAWS = 0.05f;
+
     private SpriteRenderer ballRenderer;
     private Rigidbody2D ballRigidBody;
     private SpriteRenderer paintRenderer;
@@ -13,15 +20,16 @@ public class Ball : MonoBehaviour
         Color.blue, Color.green, Color.yellow, Color.red, Color.magenta
     });
 
-    // The number of balls to be drawn per second
-    private const float BALLS_PER_SECOND = 200f;
-
     // Position on the most recent draw
     private Vector2 previousDrawPos;
 
+    // Time that has elapsed since the most recent draw event
+    float elapsed = 0f;
+
     void Awake()
     {
-        paintRenderer = GameObject.FindGameObjectWithTag("Paint").GetComponent<SpriteRenderer>();
+        paintRenderer = GameObject.FindGameObjectWithTag("Paint")
+            .GetComponent<SpriteRenderer>();
         ballRenderer = GetComponent<SpriteRenderer>();
         ballRigidBody = GetComponent<Rigidbody2D>();
 
@@ -36,14 +44,23 @@ public class Ball : MonoBehaviour
         ballRigidBody.AddForce(force);
     }
 
+    /**
+     * Check if enough time has passed to draw the
+     * next batch of dots.
+     */
     private void FixedUpdate() {
+        elapsed += Time.deltaTime;
+        if(elapsed < TIME_BETWEEN_DRAWS) {
+            return;
+        }
         DrawDots(transform.position);
     }
 
     private void OnCollisionEnter2D(Collision2D collision) {
+        elapsed += Time.deltaTime;
         // Draw the dots to the contact position. This
         // makes sure dots are drawn right up to the wall.
-        DrawDots(collision.contacts[0].point);   
+        DrawDots(collision.contacts[0].point);
     }
 
     /**
@@ -52,7 +69,7 @@ public class Ball : MonoBehaviour
      * @param targetPos
      */
     private void DrawDots(Vector3 targetPos) {
-        float steps = Time.deltaTime * BALLS_PER_SECOND;
+        float steps = elapsed * BALLS_PER_SECOND;
         Texture2D bgTexture = paintRenderer.sprite.texture;
         for (float t=0; t < 1; t += (1f/steps)) {
             Vector2 pos = Vector2.Lerp(previousDrawPos, targetPos, t);
@@ -61,6 +78,7 @@ public class Ball : MonoBehaviour
 
         bgTexture.Apply();
         previousDrawPos = targetPos;
+        elapsed = 0f;
     }
 
     /**
