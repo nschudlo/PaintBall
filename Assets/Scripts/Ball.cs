@@ -21,7 +21,8 @@ public class Ball : MonoBehaviour
 
     void Awake()
     {
-        paintRenderer = GameObject.FindGameObjectWithTag("Paint").GetComponent<SpriteRenderer>();
+        paintRenderer = GameObject.FindGameObjectWithTag("Paint")
+            .GetComponent<SpriteRenderer>();
         ballRenderer = GetComponent<SpriteRenderer>();
         ballRigidBody = GetComponent<Rigidbody2D>();
 

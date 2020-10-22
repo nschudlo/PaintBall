@@ -59,7 +59,9 @@ public class Manager : MonoBehaviour
             .sprite = Utility.createSprite(
                 (int)bgWidth, (int)bgHeight, Color.clear
             );
-        
+
+        GameObject.FindObjectOfType<TextureManager>().init(bgWidth, bgHeight, horizontal, vertical);
+
         // Remove instructions so they aren't always there
         Invoke("RemoveInstructions", 10);
     }
