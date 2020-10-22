@@ -53,14 +53,9 @@ public class Manager : MonoBehaviour
                 (int)bgWidth, (int)bgHeight, Color.black
             );
 
-        // Setup the paintable background sprite
-        GameObject.FindGameObjectWithTag("Paint")
-            .GetComponent<SpriteRenderer>()
-            .sprite = Utility.createSprite(
-                (int)bgWidth, (int)bgHeight, Color.clear
-            );
-
-        GameObject.FindObjectOfType<TextureManager>().init(bgWidth, bgHeight, horizontal, vertical);
+        // Setup the paint layer manager
+        GameObject.FindObjectOfType<TextureManager>()
+            .init(bgWidth, bgHeight, horizontal, vertical);
 
         // Remove instructions so they aren't always there
         Invoke("RemoveInstructions", 10);
@@ -70,11 +65,7 @@ public class Manager : MonoBehaviour
      * Wipe the paint layer
      */
     private void ResetPaintLayer() {
-        Utility.setTextureColor(
-            GameObject.FindGameObjectWithTag("Paint")
-            .GetComponent<SpriteRenderer>().sprite.texture,
-            Color.clear
-        );
+        GameObject.FindObjectOfType<TextureManager>().ResetPaintLayer();
     }
 
     /**

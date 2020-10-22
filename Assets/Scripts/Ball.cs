@@ -6,7 +6,10 @@ public class Ball : MonoBehaviour
 {
     private SpriteRenderer ballRenderer;
     private Rigidbody2D ballRigidBody;
-    private SpriteRenderer paintRenderer;
+    private TextureManager textureManager;
+
+    private float bgWidth;
+    private float bgHeight;
 
     // Queue of colors to cycle through
     private Queue<Color> colorsQueue = new Queue<Color>(new []{ 
@@ -21,8 +24,12 @@ public class Ball : MonoBehaviour
 
     void Awake()
     {
-        paintRenderer = GameObject.FindGameObjectWithTag("Paint")
+        SpriteRenderer background = GameObject.FindGameObjectWithTag("Background")
             .GetComponent<SpriteRenderer>();
+        bgWidth = background.sprite.texture.width;
+        bgHeight = background.sprite.texture.height;
+
+        textureManager = GameObject.FindObjectOfType<TextureManager>();
         ballRenderer = GetComponent<SpriteRenderer>();
         ballRigidBody = GetComponent<Rigidbody2D>();
 
@@ -54,13 +61,12 @@ public class Ball : MonoBehaviour
      */
     private void DrawDots(Vector3 targetPos) {
         float steps = Time.deltaTime * BALLS_PER_SECOND;
-        Texture2D bgTexture = paintRenderer.sprite.texture;
         for (float t=0; t < 1; t += (1f/steps)) {
             Vector2 pos = Vector2.Lerp(previousDrawPos, targetPos, t);
-            DrawDot(bgTexture, pos);
+            DrawDot(pos);
         }
 
-        bgTexture.Apply();
+        textureManager.Apply();
         previousDrawPos = targetPos;
     }
 
@@ -68,13 +74,13 @@ public class Ball : MonoBehaviour
      * Draw a dot at a position
      * @param pos
      */
-    private void DrawDot(Texture2D bgTexture, Vector2 pos) {
+    private void DrawDot(Vector2 pos) {
         Color color = colorsQueue.Dequeue();
 
         // Get the ball position on the paint layer
         Vector2 ballPos = Camera.main.WorldToScreenPoint(pos);
-        int ballX = (int)(ballPos.x * bgTexture.width / Camera.main.pixelWidth);
-        int ballY = (int)(ballPos.y * bgTexture.height / Camera.main.pixelHeight);
+        int ballX = (int)(ballPos.x * bgWidth / Camera.main.pixelWidth);
+        int ballY = (int)(ballPos.y * bgHeight / Camera.main.pixelHeight);
 
         Texture2D ballTexture = ballRenderer.sprite.texture;
         int startX = ballX - (ballTexture.width / 2);
@@ -84,7 +90,7 @@ public class Ball : MonoBehaviour
                 int bgX = startX + x;
                 int bgY = startY + y;
                 // Don't draw outside of background texture
-                if(bgX < 0 || bgY < 0 || bgX >= bgTexture.width || bgY >= bgTexture.height) {
+                if(bgX < 0 || bgY < 0 || bgX >= bgWidth || bgY >= bgHeight) {
                     continue;
                 }
                 
@@ -93,7 +99,7 @@ public class Ball : MonoBehaviour
                     continue;
                 }
 
-                bgTexture.SetPixel(bgX, bgY, color);
+                textureManager.SetPixel(bgX, bgY, color);
             }
         }
         colorsQueue.Enqueue(color);
