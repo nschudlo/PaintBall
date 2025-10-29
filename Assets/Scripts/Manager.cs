@@ -76,7 +76,7 @@ public class Manager : MonoBehaviour
     }
 
     /**
-     * This message will self descruct in 3...2...1...
+     * This message will self destruct in 3...2...1...
      */
     private void RemoveInstructions() {
         Destroy(instructions);
