@@ -20,7 +20,7 @@ public class Manager : MonoBehaviour {
     private float bgHeight;
 
     void Start() {
-        screenAspect = Screen.width / Screen.height;
+        screenAspect = (float)Screen.width / (float)Screen.height;
         horizontal = Camera.main.orthographicSize * screenAspect;
         vertical = Camera.main.orthographicSize;
 
