@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Manager : MonoBehaviour
-{
+public class Manager : MonoBehaviour {
     public GameObject boundingBoxPrefab;
     public GameObject ballPrefab;
     public GameObject instructions;
@@ -22,29 +19,28 @@ public class Manager : MonoBehaviour
     private float bgWidth;
     private float bgHeight;
 
-    void Start()
-    {
-        screenAspect = (float)Screen.width / (float)Screen.height;
+    void Start() {
+        screenAspect = Screen.width / Screen.height;
         horizontal = Camera.main.orthographicSize * screenAspect;
         vertical = Camera.main.orthographicSize;
 
         // Setup the bounding box
-        float xPos = horizontal + (BOUNDING_BOX_WIDTH/2f);
+        float xPos = horizontal + (BOUNDING_BOX_WIDTH / 2f);
         GameObject leftBox = Instantiate(boundingBoxPrefab, new Vector3(-xPos, 0, 0), Quaternion.identity);
-        leftBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical*2, 1);
+        leftBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical * 2, 1);
 
         GameObject rightBox = Instantiate(boundingBoxPrefab, new Vector3(xPos, 0, 0), Quaternion.identity);
-        rightBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical*2, 1);
+        rightBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical * 2, 1);
 
-        float yPos = vertical + (BOUNDING_BOX_WIDTH/2f);
+        float yPos = vertical + (BOUNDING_BOX_WIDTH / 2f);
         GameObject topBox = Instantiate(boundingBoxPrefab, new Vector3(0, yPos, 0), Quaternion.identity);
-        topBox.transform.localScale = new Vector3(horizontal*2, BOUNDING_BOX_WIDTH, 1);
+        topBox.transform.localScale = new Vector3(horizontal * 2, BOUNDING_BOX_WIDTH, 1);
 
         GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -yPos, 0), Quaternion.identity);
-        bottomBox.transform.localScale = new Vector3(horizontal*2, BOUNDING_BOX_WIDTH, 1);
+        bottomBox.transform.localScale = new Vector3(horizontal * 2, BOUNDING_BOX_WIDTH, 1);
 
-        bgWidth = horizontal*2*Utility.PIXELS_PER_UNIT;
-        bgHeight = vertical*2*Utility.PIXELS_PER_UNIT;
+        bgWidth = horizontal * 2 * Utility.PIXELS_PER_UNIT;
+        bgHeight = vertical * 2 * Utility.PIXELS_PER_UNIT;
 
         // Setup the static background sprite
         GameObject.FindGameObjectWithTag("Background")
@@ -59,7 +55,7 @@ public class Manager : MonoBehaviour
             .sprite = Utility.createSprite(
                 (int)bgWidth, (int)bgHeight, Color.clear
             );
-        
+
         // Remove instructions so they aren't always there
         Invoke("RemoveInstructions", 10);
     }
@@ -76,7 +72,7 @@ public class Manager : MonoBehaviour
     }
 
     /**
-     * This message will self destruct in 3...2...1...
+     * Destroy the on screen instructions.
      */
     private void RemoveInstructions() {
         Destroy(instructions);
@@ -85,35 +81,34 @@ public class Manager : MonoBehaviour
     /**
      * Listen for mouse presses to add or remove balls.
      */
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Space)) {
+    void Update() {
+        if (Input.GetKeyDown(KeyCode.Space)) {
             ResetPaintLayer();
         }
 
         // Take note of the mouse starting position
-        if(Input.GetKeyDown(KeyCode.Mouse0)) {
+        if (Input.GetKeyDown(KeyCode.Mouse0)) {
             mouseStartPos = Input.mousePosition;
             mousePrevPos = mouseStartPos;
-            
+
         // Start the ball if the mouse is down
-        } else if(Input.GetKey(KeyCode.Mouse0)) {
-            if(ball == null) { 
+        } else if (Input.GetKey(KeyCode.Mouse0)) {
+            if (ball == null) {
                 Vector2 mouseCurrPos = Input.mousePosition;
                 // Check if mouse has moved outside the desired bounds
                 float distance = Mathf.Abs(Vector2.Distance(mouseStartPos, mouseCurrPos));
-                
-                if(distance > DISTANCE_TO_MOVE) {
+
+                if (distance > DISTANCE_TO_MOVE) {
                     Vector2 startPos = Camera.main.ScreenToWorldPoint(mouseStartPos);
                     // Create the ball
                     ball = Instantiate(
-                        ballPrefab, 
-                        startPos, 
+                        ballPrefab,
+                        startPos,
                         Quaternion.identity
                     );
-                    
+
                     // Limit the speed
-                    float speed = Mathf.Abs(Vector2.Distance(mousePrevPos, mouseCurrPos))/Time.deltaTime;
+                    float speed = Mathf.Abs(Vector2.Distance(mousePrevPos, mouseCurrPos)) / Time.deltaTime;
 
                     // Add the force to the ball
                     Vector2 force = (mouseCurrPos - mouseStartPos) * (speed / FORCE_SPEED_RATIO);
@@ -123,7 +118,7 @@ public class Manager : MonoBehaviour
             }
 
         // Stop the ball on mouse up
-        } else if(Input.GetKeyUp(KeyCode.Mouse0)) {
+        } else if (Input.GetKeyUp(KeyCode.Mouse0)) {
             mouseStartPos = Vector2.zero;
             Destroy(ball);
             ball = null;
