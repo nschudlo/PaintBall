@@ -98,13 +98,12 @@ public class Ball : MonoBehaviour {
      */
     private void DrawDots(Vector3 targetPos) {
         float steps = elapsed * BALLS_PER_SECOND;
-        Texture2D bgTexture = paintRenderer.sprite.texture;
         for (float t = 0; t < 1; t += 1f / steps) {
             Vector2 pos = Vector2.Lerp(previousDrawPos, targetPos, t);
-            DrawDot(bgTexture, pos);
+            DrawDot(paintRenderer.sprite.texture, pos);
         }
 
-        bgTexture.Apply();
+        paintRenderer.sprite.texture.Apply();
         previousDrawPos = targetPos;
         elapsed = 0f;
     }
