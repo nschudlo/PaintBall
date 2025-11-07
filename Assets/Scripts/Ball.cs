@@ -10,13 +10,6 @@ public class Ball : MonoBehaviour {
     private const float BALLS_PER_SECOND = 200f;
 
     /**
-     * The minimum time to wait before calling draw
-     * again. This doesn't prevent drawing dots when
-     * the ball collides with the walls.
-     */
-    private const float TIME_BETWEEN_DRAWS = 0.05f;
-
-    /**
      * Reference to the ball renderer
      */
     private SpriteRenderer ballRenderer;
@@ -27,9 +20,14 @@ public class Ball : MonoBehaviour {
     private Rigidbody2D ballRigidBody;
 
     /**
-     * Reference to the sprite renderer for the background
+     * Reference to the paintboard render texture
      */
-    private SpriteRenderer paintRenderer;
+    private RenderTexture paintboardRT;
+
+    /**
+     * The material with the shader for stamping textures
+     */
+    public Material stampMaterial;
 
     /**
      * List of colors to cycle through
@@ -53,8 +51,6 @@ public class Ball : MonoBehaviour {
      * Handle getting references to needed components.
      */
     void Awake() {
-        paintRenderer = GameObject.FindGameObjectWithTag("Paint")
-            .GetComponent<SpriteRenderer>();
         ballRenderer = GetComponent<SpriteRenderer>();
         ballRigidBody = GetComponent<Rigidbody2D>();
 
@@ -65,19 +61,17 @@ public class Ball : MonoBehaviour {
      * Initialize the ball movement.
      * @param force
      */
-    public void Init(Vector2 force) {
+    public void Init(Vector2 force, RenderTexture paintboardRT) {
         ballRigidBody.AddForce(force);
+        this.paintboardRT = paintboardRT;
     }
 
     /**
-     * Check if enough time has passed to draw the
-     * next batch of dots.
+     * Draw the next batch of dots.
      */
     private void FixedUpdate() {
         elapsed += Time.deltaTime;
-        if (elapsed >= TIME_BETWEEN_DRAWS) {
-            DrawDots(transform.position);
-        }
+        DrawDots(transform.position);
     }
 
     /**
@@ -100,10 +94,9 @@ public class Ball : MonoBehaviour {
         float steps = elapsed * BALLS_PER_SECOND;
         for (float t = 0; t < 1; t += 1f / steps) {
             Vector2 pos = Vector2.Lerp(previousDrawPos, targetPos, t);
-            DrawDot(paintRenderer.sprite.texture, pos);
+            DrawDot(pos);
         }
 
-        paintRenderer.sprite.texture.Apply();
         previousDrawPos = targetPos;
         elapsed = 0f;
     }
@@ -113,34 +106,37 @@ public class Ball : MonoBehaviour {
      * @param bgTexture
      * @param pos
      */
-    private void DrawDot(Texture2D bgTexture, Vector2 pos) {
+    private void DrawDot(Vector2 pos) {
         Color color = COLOURS[colourIdx++];
         colourIdx = colourIdx % COLOURS.Length;
 
         // Get the ball position on the paint layer
         Vector2 ballPos = Camera.main.WorldToScreenPoint(pos);
-        int ballX = (int)(ballPos.x * bgTexture.width / Camera.main.pixelWidth);
-        int ballY = (int)(ballPos.y * bgTexture.height / Camera.main.pixelHeight);
+        int ballX = (int)(ballPos.x * paintboardRT.width / Camera.main.pixelWidth);
+        int ballY = (int)(ballPos.y * paintboardRT.height / Camera.main.pixelHeight);
 
         Texture2D ballTexture = ballRenderer.sprite.texture;
-        int startX = ballX - (ballTexture.width / 2);
-        int startY = ballY - (ballTexture.height / 2);
-        for (int x = 0; x < ballTexture.width; x++) {
-            for (int y = 0; y < ballTexture.height; y++) {
-                int bgX = startX + x;
-                int bgY = startY + y;
-                // Don't draw outside of background texture
-                if (bgX < 0 || bgY < 0 || bgX >= bgTexture.width || bgY >= bgTexture.height) {
-                    continue;
-                }
+        StampCircleFixed(paintboardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial);
+    }
 
-                // Ignore clear pixels
-                if (ballTexture.GetPixel(x, y).a == 0) {
-                    continue;
-                }
+    public void StampCircleFixed(RenderTexture mainRT, Texture2D circleTexture, Vector2 positionPixels, Material stampMat) {
+        stampMat.SetTexture("_StampTex", circleTexture);
 
-                bgTexture.SetPixel(bgX, bgY, color);
-            }
-        }
+        // Position must be converted to UV space (0 to 1)
+        Vector2 positionUV = new Vector2(
+            positionPixels.x / mainRT.width,
+            positionPixels.y / mainRT.height
+        );
+        stampMat.SetVector("_StampPositionUV", positionUV);
+
+        // Pass the size of the circle for the shader to use
+        stampMat.SetFloat("_StampSizePixels", 20);
+
+        // Use the custom material/shader to stamp the circle onto the buffer
+        RenderTexture tempRT = RenderTexture.GetTemporary(mainRT.width, mainRT.height, 0, mainRT.format);
+        Graphics.Blit(mainRT, tempRT);
+        Graphics.Blit(tempRT, mainRT, stampMat);
+
+        RenderTexture.ReleaseTemporary(tempRT);
     }
 }

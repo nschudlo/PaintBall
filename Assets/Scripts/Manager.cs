@@ -19,6 +19,8 @@ public class Manager : MonoBehaviour {
     private float bgWidth;
     private float bgHeight;
 
+    public RenderTexture paintboardRT;
+
     void Start() {
         screenAspect = (float)Screen.width / (float)Screen.height;
         horizontal = Camera.main.orthographicSize * screenAspect;
@@ -49,12 +51,10 @@ public class Manager : MonoBehaviour {
                 (int)bgWidth, (int)bgHeight, Color.black
             );
 
-        // Setup the paintable background sprite
-        GameObject.FindGameObjectWithTag("Paint")
-            .GetComponent<SpriteRenderer>()
-            .sprite = Utility.createSprite(
-                (int)bgWidth, (int)bgHeight, Color.clear
-            );
+        // Setup the paintable render texture
+        paintboardRT.width = (int)bgWidth;
+        paintboardRT.height = (int)bgHeight;
+        paintboardRT.Release();
 
         // Remove instructions so they aren't always there
         Invoke("RemoveInstructions", 10);
@@ -64,11 +64,7 @@ public class Manager : MonoBehaviour {
      * Wipe the paint layer
      */
     private void ResetPaintLayer() {
-        Utility.setTextureColor(
-            GameObject.FindGameObjectWithTag("Paint")
-            .GetComponent<SpriteRenderer>().sprite.texture,
-            Color.clear
-        );
+        paintboardRT.Release();
     }
 
     /**
@@ -112,7 +108,7 @@ public class Manager : MonoBehaviour {
 
                     // Add the force to the ball
                     Vector2 force = (mouseCurrPos - mouseStartPos) * (speed / FORCE_SPEED_RATIO);
-                    ball.GetComponent<Ball>().Init(force);
+                    ball.GetComponent<Ball>().Init(force, paintboardRT);
                 }
                 mousePrevPos = mouseCurrPos;
             }
