@@ -43,11 +43,6 @@ public class Ball : MonoBehaviour {
     private Vector2 previousDrawPos;
 
     /**
-     * Time that has elapsed since the most recent draw event
-     */
-    float elapsed = 0f;
-
-    /**
      * Handle getting references to needed components.
      */
     void Awake() {
@@ -70,19 +65,7 @@ public class Ball : MonoBehaviour {
      * Draw the next batch of dots.
      */
     private void FixedUpdate() {
-        elapsed += Time.deltaTime;
         DrawDots(transform.position);
-    }
-
-    /**
-     * Handles the case where the ball hits the edge, so the
-     * trail of balls needs to be drawn early.
-     */
-    private void OnCollisionEnter2D(Collision2D collision) {
-        elapsed += Time.deltaTime;
-        // Draw the dots to the contact position. This
-        // makes sure dots are drawn right up to the wall.
-        DrawDots(collision.contacts[0].point);
     }
 
     /**
@@ -91,25 +74,24 @@ public class Ball : MonoBehaviour {
      * @param targetPos
      */
     private void DrawDots(Vector3 targetPos) {
-        float steps = elapsed * BALLS_PER_SECOND;
+        Color color = COLOURS[colourIdx++];
+        colourIdx = colourIdx % COLOURS.Length;
+
+        float steps = Time.fixedDeltaTime * BALLS_PER_SECOND;
         for (float t = 0; t < 1; t += 1f / steps) {
             Vector2 pos = Vector2.Lerp(previousDrawPos, targetPos, t);
-            DrawDot(pos);
+            DrawDot(pos, color);
         }
 
         previousDrawPos = targetPos;
-        elapsed = 0f;
     }
 
     /**
      * Draw a dot at a position
-     * @param bgTexture
      * @param pos
+     * @param color
      */
-    private void DrawDot(Vector2 pos) {
-        Color color = COLOURS[colourIdx++];
-        colourIdx = colourIdx % COLOURS.Length;
-
+    private void DrawDot(Vector2 pos, Color color) {
         // Get the ball position on the paint layer
         Vector2 ballPos = Camera.main.WorldToScreenPoint(pos);
         int ballX = (int)(ballPos.x * paintboardRT.width / Camera.main.pixelWidth);

@@ -149,7 +149,7 @@ public class Manager : MonoBehaviour {
                     // Create the ball
                     ball = Instantiate(
                         ballPrefab,
-                        startPos,
+                        startPos, 
                         Quaternion.identity
                     );
 
