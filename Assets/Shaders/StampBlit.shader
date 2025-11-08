@@ -7,6 +7,7 @@ Shader "Custom/StampBlitShader"
         _StampPositionUV ("Stamp Center (UV)", Vector) = (0,0,0,0)
         _StampWidthPixels ("Stamp Width (Pixels)", Float) = 50.0
         _StampHeightPixels ("Stamp Height (Pixels)", Float) = 50.0
+        _StampColor ("Optional Stamp Color", Color) = (1,1,1,1)
     }
 
     SubShader
@@ -28,6 +29,7 @@ Shader "Custom/StampBlitShader"
             float4 _StampPositionUV;
             float _StampWidthPixels;
             float _StampHeightPixels;
+            float4 _StampColor;
 
             struct v2f
             {
@@ -82,8 +84,12 @@ Shader "Custom/StampBlitShader"
                 // 5. Sample the stamp and blend
                 fixed4 stampColor = tex2D(_StampTex, stampUV);
 
+                if (stampColor.a == 0) {
+                    return existingColor;
+                }
+
                 // Blend the stamp color with the existing color based on the stamp's alpha
-                return lerp(existingColor, stampColor, stampColor.a);
+                return lerp(existingColor, _StampColor, stampColor.a);
             }
             ENDCG
         }

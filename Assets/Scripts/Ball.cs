@@ -116,7 +116,7 @@ public class Ball : MonoBehaviour {
         int ballY = (int)(ballPos.y * paintboardRT.height / Camera.main.pixelHeight);
 
         Texture2D ballTexture = ballRenderer.sprite.texture;
-        StampTextureToRenderTexture(paintboardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27));
+        StampTextureToRenderTexture(paintboardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27), color);
     }
 
     /**
@@ -126,8 +126,9 @@ public class Ball : MonoBehaviour {
      * @param positionPixels - the position to place the stamp
      * @param stampMat - the material used to stamp
      * @param targetSize - the target size of the texture
+     * @param color - color to apply to the stamp
      */
-    public void StampTextureToRenderTexture(RenderTexture renderTexture, Texture2D stampTexture, Vector2 positionPixels, Material stampMat, Vector2 targetSize) {
+    public void StampTextureToRenderTexture(RenderTexture renderTexture, Texture2D stampTexture, Vector2 positionPixels, Material stampMat, Vector2 targetSize, Color color) {
         stampMat.SetTexture("_StampTex", stampTexture);
 
         // Position must be converted to UV space (0 to 1)
@@ -141,6 +142,8 @@ public class Ball : MonoBehaviour {
         // TODO fix this so the circle is the same size as the physics ball
         stampMat.SetFloat("_StampWidthPixels", targetSize.x);
         stampMat.SetFloat("_StampHeightPixels", targetSize.y);
+
+        stampMat.SetColor("_StampColor", color);
 
         // Use the custom material/shader to stamp the circle onto the buffer
         RenderTexture tempRT = RenderTexture.GetTemporary(renderTexture.width, renderTexture.height, 0, renderTexture.format);
