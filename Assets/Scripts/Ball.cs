@@ -139,7 +139,8 @@ public class Ball : MonoBehaviour {
 
         // Pass the size of the circle for the shader to use
         // TODO fix this so the circle is the same size as the physics ball
-        stampMat.SetFloat("_StampSizePixels", targetSize.x);
+        stampMat.SetFloat("_StampWidthPixels", targetSize.x);
+        stampMat.SetFloat("_StampHeightPixels", targetSize.y);
 
         // Use the custom material/shader to stamp the circle onto the buffer
         RenderTexture tempRT = RenderTexture.GetTemporary(renderTexture.width, renderTexture.height, 0, renderTexture.format);

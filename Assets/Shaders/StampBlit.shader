@@ -3,18 +3,17 @@ Shader "Custom/StampBlitShader"
     Properties
     {
         _MainTex ("Previous Drawing", 2D) = "white" {}
-        _StampTex ("Circle Texture", 2D) = "white" {}
+        _StampTex ("Stamp Texture", 2D) = "white" {}
         _StampPositionUV ("Stamp Center (UV)", Vector) = (0,0,0,0)
-        _StampSizePixels ("Stamp Size (Pixels)", Float) = 50.0
+        _StampWidthPixels ("Stamp Width (Pixels)", Float) = 50.0
+        _StampHeightPixels ("Stamp Height (Pixels)", Float) = 50.0
     }
-    
+
     SubShader
     {
-        // ... (Tags and Pass setup) ...
-
         Pass
         {
-            // Set up Alpha Blending (Important for stamping/drawing!)
+            // IMPORTANT: Alpha Blending for layering (SrcAlpha Over OneMinusSrcAlpha)
             Blend SrcAlpha OneMinusSrcAlpha 
             Cull Off ZWrite Off ZTest Always
 
@@ -27,8 +26,8 @@ Shader "Custom/StampBlitShader"
             sampler2D _MainTex;
             sampler2D _StampTex;
             float4 _StampPositionUV;
-            float _StampSizePixels;
-            float4 _MainTex_TexelSize; // Unity built-in for texture size
+            float _StampWidthPixels;
+            float _StampHeightPixels;
 
             struct v2f
             {
@@ -49,40 +48,41 @@ Shader "Custom/StampBlitShader"
                 // 1. Get the existing drawing color (from tempRT)
                 fixed4 existingColor = tex2D(_MainTex, i.uv);
 
-                // 2. Determine if the current pixel (i.uv) is inside the stamp area
+                // --- 2. Calculate coordinates in screen/texture space (Pixels) ---
 
-                // Convert UV position to pixel position
+                // Current pixel position on the destination RT
                 float2 pixelPos = i.uv * _ScreenParams.xy; 
                 
-                // Convert Stamp UV center to pixel position
+                // Stamp center position on the destination RT
                 float2 stampCenter = _StampPositionUV.xy * _ScreenParams.xy;
+                
+                // Calculate pixel offset from the center of the stamp
+                float2 offsetFromCenter = pixelPos - stampCenter;
 
-                // Calculate the distance from the current pixel to the stamp center
-                float dist = distance(pixelPos, stampCenter);
+                // --- 3. Rectangular Bounds Check ---
 
-                // If the pixel is outside the circle's radius, return the existing color
-                if (dist > _StampSizePixels / 2.0)
+                // Half dimensions
+                float halfWidth = _StampWidthPixels / 2.0;
+                float halfHeight = _StampHeightPixels / 2.0;
+
+                // Check if pixel is outside the stamp's rectangular bounds
+                if (abs(offsetFromCenter.x) > halfWidth || abs(offsetFromCenter.y) > halfHeight)
                 {
                     return existingColor;
                 }
 
-                // 3. If inside, calculate the UV for the small circle texture
+                // --- 4. Calculate UV for the Stamp Texture ---
+
+                // Normalize the offset to the stamp's half-dimensions (results in -1.0 to 1.0)
+                float2 normalizedOffset = offsetFromCenter / float2(halfWidth, halfHeight);
                 
-                // Get the offset from the center of the stamp
-                float2 offset = pixelPos - stampCenter;
-                
-                // Normalize the offset to the size of the stamp (from -0.5 to 0.5)
-                float2 normalizedOffset = offset / (_StampSizePixels / 2.0);
-                
-                // Convert to the actual UV range of the stamp texture (0 to 1)
+                // Convert normalized offset (-1.0 to 1.0) to actual UV coordinates (0.0 to 1.0)
                 float2 stampUV = normalizedOffset * 0.5 + 0.5;
 
-                // 4. Sample the circle and blend
+                // 5. Sample the stamp and blend
                 fixed4 stampColor = tex2D(_StampTex, stampUV);
 
-                // Blend the stamp color with the existing color
-                // The Blend mode in the Pass { ... } block handles the final output.
-                // We ensure the final fragment color includes the alpha from the stamp.
+                // Blend the stamp color with the existing color based on the stamp's alpha
                 return lerp(existingColor, stampColor, stampColor.a);
             }
             ENDCG
