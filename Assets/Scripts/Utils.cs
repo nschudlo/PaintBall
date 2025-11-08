@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
-public class Utility 
-{
+public class Utils {
 
     public const int PIXELS_PER_UNIT = 100;
 
@@ -16,8 +15,8 @@ public class Utility
         setTextureColor(texture, color);
 
         return Sprite.Create(
-            texture, 
-            new Rect(0.0f, 0.0f, width, height), 
+            texture,
+            new Rect(0.0f, 0.0f, width, height),
             new Vector2(0.5f, 0.5f),
             PIXELS_PER_UNIT
         );
@@ -30,10 +29,21 @@ public class Utility
      */
     static public void setTextureColor(Texture2D texture, Color color) {
         Color[] pixels = new Color[texture.width * texture.height];
-        for(int startColorIdx=0; startColorIdx < pixels.Length; startColorIdx++) {
+        for (int startColorIdx = 0; startColorIdx < pixels.Length; startColorIdx++) {
             pixels[startColorIdx] = color;
         }
         texture.SetPixels(pixels);
         texture.Apply();
+    }
+
+    /**
+     * Clear the contents of a RenderTexture
+     * @param renderTexture
+     */
+    static public void ClearOutRenderTexture(RenderTexture renderTexture) {
+        RenderTexture rt = RenderTexture.active;
+        RenderTexture.active = renderTexture;
+        GL.Clear(true, true, Color.clear);
+        RenderTexture.active = rt;
     }
 }

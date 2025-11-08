@@ -116,26 +116,35 @@ public class Ball : MonoBehaviour {
         int ballY = (int)(ballPos.y * paintboardRT.height / Camera.main.pixelHeight);
 
         Texture2D ballTexture = ballRenderer.sprite.texture;
-        StampCircleFixed(paintboardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial);
+        StampTextureToRenderTexture(paintboardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27));
     }
 
-    public void StampCircleFixed(RenderTexture mainRT, Texture2D circleTexture, Vector2 positionPixels, Material stampMat) {
-        stampMat.SetTexture("_StampTex", circleTexture);
+    /**
+     * Stamps a texture onto a render texture at a given x, y coordinate
+     * @param renderTexture - the target render texture
+     * @param stampTexture - the texture to stamp
+     * @param positionPixels - the position to place the stamp
+     * @param stampMat - the material used to stamp
+     * @param targetSize - the target size of the texture
+     */
+    public void StampTextureToRenderTexture(RenderTexture renderTexture, Texture2D stampTexture, Vector2 positionPixels, Material stampMat, Vector2 targetSize) {
+        stampMat.SetTexture("_StampTex", stampTexture);
 
         // Position must be converted to UV space (0 to 1)
         Vector2 positionUV = new Vector2(
-            positionPixels.x / mainRT.width,
-            positionPixels.y / mainRT.height
+            positionPixels.x / renderTexture.width,
+            positionPixels.y / renderTexture.height
         );
         stampMat.SetVector("_StampPositionUV", positionUV);
 
         // Pass the size of the circle for the shader to use
-        stampMat.SetFloat("_StampSizePixels", 20);
+        // TODO fix this so the circle is the same size as the physics ball
+        stampMat.SetFloat("_StampSizePixels", targetSize.x);
 
         // Use the custom material/shader to stamp the circle onto the buffer
-        RenderTexture tempRT = RenderTexture.GetTemporary(mainRT.width, mainRT.height, 0, mainRT.format);
-        Graphics.Blit(mainRT, tempRT);
-        Graphics.Blit(tempRT, mainRT, stampMat);
+        RenderTexture tempRT = RenderTexture.GetTemporary(renderTexture.width, renderTexture.height, 0, renderTexture.format);
+        Graphics.Blit(renderTexture, tempRT);
+        Graphics.Blit(tempRT, renderTexture, stampMat);
 
         RenderTexture.ReleaseTemporary(tempRT);
     }

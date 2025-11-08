@@ -1,10 +1,40 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class Manager : MonoBehaviour {
+    /**
+     * Reference to the prefab used to build the bounding box
+     * around the paint board container
+     */
     public GameObject boundingBoxPrefab;
+
+    /**
+     * The ball prefab
+     * // TODO move this to a paint brush class
+     */
     public GameObject ballPrefab;
+
+    /**
+     * The prefab for making new layers
+     */
+    public GameObject paintBoardLayerPrefab;
+
+    /**
+     * The container living in the canvas element to hold
+     * the paint board layers
+     */
+    public GameObject paintBoardContainer;
+
+    /**
+     * Reference to the instructions game object
+     */
     public GameObject instructions;
 
+    /**
+     * Reference to the current ball on screen
+     * // TODO move this to a paint brush class
+     */
     private GameObject ball;
     private const float BOUNDING_BOX_WIDTH = 0.1f;
     private const float DISTANCE_TO_MOVE = 50;
@@ -19,7 +49,15 @@ public class Manager : MonoBehaviour {
     private float bgWidth;
     private float bgHeight;
 
-    public RenderTexture paintboardRT;
+    /**
+     * The list holding all the layers
+     */
+    private List<GameObject> layers = new List<GameObject>();
+
+    /**
+     * The currently selected paint board layer
+     */
+    private RenderTexture currentPaintBoard;
 
     void Start() {
         screenAspect = (float)Screen.width / (float)Screen.height;
@@ -41,30 +79,42 @@ public class Manager : MonoBehaviour {
         GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -yPos, 0), Quaternion.identity);
         bottomBox.transform.localScale = new Vector3(horizontal * 2, BOUNDING_BOX_WIDTH, 1);
 
-        bgWidth = horizontal * 2 * Utility.PIXELS_PER_UNIT;
-        bgHeight = vertical * 2 * Utility.PIXELS_PER_UNIT;
+        bgWidth = horizontal * 2 * Utils.PIXELS_PER_UNIT;
+        bgHeight = vertical * 2 * Utils.PIXELS_PER_UNIT;
 
         // Setup the static background sprite
         GameObject.FindGameObjectWithTag("Background")
             .GetComponent<SpriteRenderer>()
-            .sprite = Utility.createSprite(
+            .sprite = Utils.createSprite(
                 (int)bgWidth, (int)bgHeight, Color.black
             );
 
-        // Setup the paintable render texture
-        paintboardRT.width = (int)bgWidth;
-        paintboardRT.height = (int)bgHeight;
-        paintboardRT.Release();
+        // Clean up any test components
+        foreach (Transform childTransform in paintBoardContainer.transform) {
+            Destroy(childTransform.gameObject);
+        }
+
+        // Add the first layer
+        AddPaintLayer();
+        currentPaintBoard = (RenderTexture)layers[0].GetComponent<RawImage>().texture;
 
         // Remove instructions so they aren't always there
         Invoke("RemoveInstructions", 10);
     }
 
+    private void AddPaintLayer() {
+        GameObject layer = Instantiate(paintBoardLayerPrefab, paintBoardContainer.transform);
+        layer.GetComponent<RawImage>().texture = new RenderTexture(
+            (int)bgWidth, (int)bgHeight, 24
+        );
+        layers.Add(layer);
+    }
+
     /**
-     * Wipe the paint layer
+     * Wipe the currently selected paint layer
      */
     private void ResetPaintLayer() {
-        paintboardRT.Release();
+        Utils.ClearOutRenderTexture(currentPaintBoard);
     }
 
     /**
@@ -108,7 +158,7 @@ public class Manager : MonoBehaviour {
 
                     // Add the force to the ball
                     Vector2 force = (mouseCurrPos - mouseStartPos) * (speed / FORCE_SPEED_RATIO);
-                    ball.GetComponent<Ball>().Init(force, paintboardRT);
+                    ball.GetComponent<Ball>().Init(force, currentPaintBoard);
                 }
                 mousePrevPos = mouseCurrPos;
             }

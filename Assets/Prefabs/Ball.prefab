@@ -168,11 +168,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c54855f29f30a444382062128f65f7ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blitMaterial: {fileID: 2100000, guid: 4c64f9a60b7e95044b993112e58a67c3, type: 2}
   stampMaterial: {fileID: 2100000, guid: 5c00d0ca58d0d1d44a70b343c2551d77, type: 2}
-  destinationRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 0.5
-    height: 0.5
