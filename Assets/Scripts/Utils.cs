@@ -46,4 +46,31 @@ public class Utils {
         GL.Clear(true, true, Color.clear);
         RenderTexture.active = rt;
     }
+
+    /**
+     * Checks if a point lies between A and B, assuming:
+     * - a is a starting point, and point is going towards b
+     * - the point is going directly from a to b
+     * @param a - the starting point of the segment
+     * @param b - the ending point of the segment
+     * @param point - the point somewhere on the ray from a to b
+     * @returns true if point is between a and b, false otherwise
+     */
+    static public bool IsPointBetweenAB(Vector2 a, Vector2 b, Vector2 point) {
+        Vector3 AB = b - a;
+        Vector3 AP = point - a;
+
+        // Calculate the squared distance from A to P (||AP||^2)
+        // as a proxy for the distance traveled from A
+        float sqrMagAP = AP.sqrMagnitude;
+
+        // Calculate the squared distance from A to B (||AB||^2)
+        // s is the total length of the segment being checked
+        float sqrMagAB = AB.sqrMagnitude;
+
+        // If ||AP||^2 is less than or equal to ||AB||^2, 
+        // P is before or at B. Since we assume P is on the line 
+        // and not behind A, this is sufficient.
+        return sqrMagAP <= sqrMagAB;
+    }
 }

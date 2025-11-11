@@ -36,11 +36,32 @@ public class Manager : MonoBehaviour {
      * // TODO move this to a paint brush class
      */
     private GameObject ball;
-    private const float BOUNDING_BOX_WIDTH = 0.1f;
-    private const float DISTANCE_TO_MOVE = 50;
-    private const float FORCE_SPEED_RATIO = 200;
 
+    /**
+     * The thickness to set the bounding boxes to
+     */
+    private const float BOUNDING_BOX_THICKNESS = 0.1f;
+
+    /**
+     * The distance the mouse needs to move away from the
+     * starting position to trigger the ball to start
+     */
+    private const float DISTANCE_TO_MOVE = 50;
+
+    /**
+     * A modifier to apply to the speed to dampen the speed
+     * being applied to the ball
+     */
+    private const float FORCE_SPEED_RATIO = 1000;
+
+    /**
+     * The position the mouse was on mouse down
+     */
     private Vector2 mouseStartPos;
+
+    /**
+     * The position the mouse was on the last update
+     */
     private Vector2 mousePrevPos;
 
     private float screenAspect;
@@ -65,19 +86,19 @@ public class Manager : MonoBehaviour {
         vertical = Camera.main.orthographicSize;
 
         // Setup the bounding box
-        float xPos = horizontal + (BOUNDING_BOX_WIDTH / 2f);
+        float xPos = horizontal + (BOUNDING_BOX_THICKNESS / 2f);
         GameObject leftBox = Instantiate(boundingBoxPrefab, new Vector3(-xPos, 0, 0), Quaternion.identity);
-        leftBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical * 2, 1);
+        leftBox.transform.localScale = new Vector3(BOUNDING_BOX_THICKNESS, vertical * 2, 1);
 
         GameObject rightBox = Instantiate(boundingBoxPrefab, new Vector3(xPos, 0, 0), Quaternion.identity);
-        rightBox.transform.localScale = new Vector3(BOUNDING_BOX_WIDTH, vertical * 2, 1);
+        rightBox.transform.localScale = new Vector3(BOUNDING_BOX_THICKNESS, vertical * 2, 1);
 
-        float yPos = vertical + (BOUNDING_BOX_WIDTH / 2f);
+        float yPos = vertical + (BOUNDING_BOX_THICKNESS / 2f);
         GameObject topBox = Instantiate(boundingBoxPrefab, new Vector3(0, yPos, 0), Quaternion.identity);
-        topBox.transform.localScale = new Vector3(horizontal * 2, BOUNDING_BOX_WIDTH, 1);
+        topBox.transform.localScale = new Vector3(horizontal * 2, BOUNDING_BOX_THICKNESS, 1);
 
         GameObject bottomBox = Instantiate(boundingBoxPrefab, new Vector3(0, -yPos, 0), Quaternion.identity);
-        bottomBox.transform.localScale = new Vector3(horizontal * 2, BOUNDING_BOX_WIDTH, 1);
+        bottomBox.transform.localScale = new Vector3(horizontal * 2, BOUNDING_BOX_THICKNESS, 1);
 
         bgWidth = horizontal * 2 * Utils.PIXELS_PER_UNIT;
         bgHeight = vertical * 2 * Utils.PIXELS_PER_UNIT;
@@ -153,12 +174,12 @@ public class Manager : MonoBehaviour {
                         Quaternion.identity
                     );
 
-                    // Limit the speed
+                    // The speed in pixels the mouse is moving as it crosses the threshold
                     float speed = Mathf.Abs(Vector2.Distance(mousePrevPos, mouseCurrPos)) / Time.deltaTime;
 
-                    // Add the force to the ball
-                    Vector2 force = (mouseCurrPos - mouseStartPos) * (speed / FORCE_SPEED_RATIO);
-                    ball.GetComponent<Ball>().Init(force, currentPaintBoard);
+                    // Initialize the ball with an intial velocity
+                    Vector2 ballVelocity = (mouseCurrPos - mouseStartPos) * (speed / Utils.PIXELS_PER_UNIT) * (1 / FORCE_SPEED_RATIO);
+                    ball.GetComponent<Ball>().Init(ballVelocity, currentPaintBoard);
                 }
                 mousePrevPos = mouseCurrPos;
             }

@@ -5,9 +5,9 @@
  */
 public class Ball : MonoBehaviour {
     /**
-     * The number of balls to be drawn per second
+     * The number of balls to be drawn per interval
      */
-    private const float BALLS_PER_SECOND = 200f;
+    private const int STEPS_PER_INTERVAL = 4;
 
     /**
      * Reference to the ball renderer
@@ -15,14 +15,9 @@ public class Ball : MonoBehaviour {
     private SpriteRenderer ballRenderer;
 
     /**
-     * Reference to the physics ball object
+     * Reference to the paint board render texture
      */
-    private Rigidbody2D ballRigidBody;
-
-    /**
-     * Reference to the paintboard render texture
-     */
-    private RenderTexture paintboardRT;
+    private RenderTexture paintBoardRT;
 
     /**
      * The material with the shader for stamping textures
@@ -43,47 +38,101 @@ public class Ball : MonoBehaviour {
     private Vector2 previousDrawPos;
 
     /**
+     * The current velocity the ball is moving
+     */
+    private Vector2 velocity;
+
+    /**
+     * The distance to separate the balls being drawn
+     */
+    private float distancePerStep;
+
+    /**
+     * The starting position of the current line segment
+     */
+    private Vector2 startPos;
+
+    /**
+     * The hit info for next boundary collision
+     */
+    private RaycastHit2D hitInfo;
+
+    /**
      * Handle getting references to needed components.
      */
     void Awake() {
         ballRenderer = GetComponent<SpriteRenderer>();
-        ballRigidBody = GetComponent<Rigidbody2D>();
-
-        previousDrawPos = transform.position;
     }
 
     /**
      * Initialize the ball movement.
-     * @param force
+     * @param initialVelocity - the initial velocity to give the ball
+     * @param paintboardRT - the paint board render texture to draw to
      */
-    public void Init(Vector2 force, RenderTexture paintboardRT) {
-        ballRigidBody.AddForce(force);
-        this.paintboardRT = paintboardRT;
+    public void Init(Vector2 initialVelocity, RenderTexture paintBoardRT) {
+        this.paintBoardRT = paintBoardRT;
+        velocity = initialVelocity;
+
+        previousDrawPos = transform.position;
+        distancePerStep = velocity.magnitude / STEPS_PER_INTERVAL;
+        UpdateVelocityInfo(transform.position);
+    }
+
+    /**
+     * Update the ball's velocity information, including calculating the next
+     * point the ball will hit a boundary.
+     * @param startPos
+     */
+    private void UpdateVelocityInfo(Vector2 startPos) {
+        this.startPos = startPos;
+
+        Collider2D prevCollider = null;
+        if (hitInfo) {
+            // Determine the new reflected velocity
+            velocity = Vector2.Reflect(velocity, hitInfo.normal);
+
+            // Disable the previous collider so the next hit can be
+            // calculated without interference
+            prevCollider = hitInfo.collider;
+            prevCollider.enabled = false;
+        }
+
+        hitInfo = Physics2D.Raycast(startPos, velocity);
+
+        if (prevCollider) {
+            prevCollider.enabled = true;
+        }
     }
 
     /**
      * Draw the next batch of dots.
      */
     private void FixedUpdate() {
-        DrawDots(transform.position);
+        DrawDots();
     }
 
     /**
      * Draw dots to fill in the positions from the most
      * recently drawn dot to the targetPos.
-     * @param targetPos
      */
-    private void DrawDots(Vector3 targetPos) {
+    private void DrawDots() {
         Color color = COLOURS[colourIdx++];
         colourIdx = colourIdx % COLOURS.Length;
 
-        float steps = Time.fixedDeltaTime * BALLS_PER_SECOND;
-        for (float t = 0; t < 1; t += 1f / steps) {
-            Vector2 pos = Vector2.Lerp(previousDrawPos, targetPos, t);
-            DrawDot(pos, color);
-        }
+        for (int stepIdx = 0; stepIdx < STEPS_PER_INTERVAL; stepIdx++) {
+            Vector2 pos = previousDrawPos + (velocity.normalized * distancePerStep);
 
-        previousDrawPos = targetPos;
+            // Check if the new pos goes beyond the boundary
+            if (!Utils.IsPointBetweenAB(startPos, hitInfo.point, pos)) {
+                pos = hitInfo.point;
+
+                // Update the velocity with the new starting position and angle
+                UpdateVelocityInfo(pos);
+            }
+
+            DrawDot(pos, color);
+            previousDrawPos = pos;
+        }
     }
 
     /**
@@ -94,11 +143,11 @@ public class Ball : MonoBehaviour {
     private void DrawDot(Vector2 pos, Color color) {
         // Get the ball position on the paint layer
         Vector2 ballPos = Camera.main.WorldToScreenPoint(pos);
-        int ballX = (int)(ballPos.x * paintboardRT.width / Camera.main.pixelWidth);
-        int ballY = (int)(ballPos.y * paintboardRT.height / Camera.main.pixelHeight);
+        int ballX = (int)(ballPos.x * paintBoardRT.width / Camera.main.pixelWidth);
+        int ballY = (int)(ballPos.y * paintBoardRT.height / Camera.main.pixelHeight);
 
         Texture2D ballTexture = ballRenderer.sprite.texture;
-        StampTextureToRenderTexture(paintboardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27), color);
+        StampTextureToRenderTexture(paintBoardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27), color);
     }
 
     /**
