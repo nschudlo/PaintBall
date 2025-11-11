@@ -10,19 +10,19 @@ public class Ball : MonoBehaviour {
     private const int STEPS_PER_INTERVAL = 4;
 
     /**
-     * Reference to the ball renderer
-     */
-    private SpriteRenderer ballRenderer;
-
-    /**
      * Reference to the paint board render texture
      */
     private RenderTexture paintBoardRT;
 
     /**
+     * The texture to stamp along the path
+     */
+    private Texture2D stampTexture;
+
+    /**
      * The material with the shader for stamping textures
      */
-    public Material stampMaterial;
+    private Material stampMaterial;
 
     /**
      * List of colors to cycle through
@@ -58,23 +58,20 @@ public class Ball : MonoBehaviour {
     private RaycastHit2D hitInfo;
 
     /**
-     * Handle getting references to needed components.
-     */
-    void Awake() {
-        ballRenderer = GetComponent<SpriteRenderer>();
-    }
-
-    /**
      * Initialize the ball movement.
      * @param initialVelocity - the initial velocity to give the ball
      * @param paintboardRT - the paint board render texture to draw to
+     * @param stampTexture - the texture to stamp along the path
      */
-    public void Init(Vector2 initialVelocity, RenderTexture paintBoardRT) {
+    public void Init(Vector2 velocity, RenderTexture paintBoardRT, Texture2D stampTexture) {
         this.paintBoardRT = paintBoardRT;
-        velocity = initialVelocity;
+        this.stampTexture = stampTexture;
+        this.velocity = velocity;
+
+        stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
 
         previousDrawPos = transform.position;
-        distancePerStep = velocity.magnitude / STEPS_PER_INTERVAL;
+        distancePerStep = this.velocity.magnitude / STEPS_PER_INTERVAL;
         UpdateVelocityInfo(transform.position);
     }
 
@@ -146,8 +143,7 @@ public class Ball : MonoBehaviour {
         int ballX = (int)(ballPos.x * paintBoardRT.width / Camera.main.pixelWidth);
         int ballY = (int)(ballPos.y * paintBoardRT.height / Camera.main.pixelHeight);
 
-        Texture2D ballTexture = ballRenderer.sprite.texture;
-        StampTextureToRenderTexture(paintBoardRT, ballTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27), color);
+        StampTextureToRenderTexture(paintBoardRT, stampTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27), color);
     }
 
     /**

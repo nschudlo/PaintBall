@@ -179,7 +179,8 @@ public class Manager : MonoBehaviour {
 
                     // Initialize the ball with an intial velocity
                     Vector2 ballVelocity = (mouseCurrPos - mouseStartPos) * (speed / Utils.PIXELS_PER_UNIT) * (1 / FORCE_SPEED_RATIO);
-                    ball.GetComponent<Ball>().Init(ballVelocity, currentPaintBoard);
+                    Texture2D ballTexture = Resources.Load<Texture2D>("Ball");
+                    ball.GetComponent<Ball>().Init(ballVelocity, currentPaintBoard, ballTexture);
                 }
                 mousePrevPos = mouseCurrPos;
             }
