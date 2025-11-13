@@ -1,18 +1,45 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /**
- * Handles drawing the trail of balls behind the ball object
+ * An enum of the possible current state of this brush
  */
-public class Ball : MonoBehaviour {
+enum EBallState {
+    /**
+     * The user isn't clicking yet
+     */
+    NotStarted,
+    /**
+     * The user has started clicking, but
+     * the brush hasn't started yet
+     */
+    InputStarted,
+    /**
+     * The user is currently clicking, and the
+     * brush has started
+     */
+    Started
+}
+
+/**
+ * A bouncing brush ball, leaving a colourful trail where it travels
+ */
+public class BouncingBallBrush : BaseBrush {
     /**
      * The number of balls to be drawn per interval
      */
     private const int STEPS_PER_INTERVAL = 4;
 
     /**
-     * Reference to the paint board render texture
+     * The distance the mouse needs to move away from the
+     * starting position to trigger the ball to start
      */
-    private RenderTexture paintBoardRT;
+    private const float DISTANCE_TO_MOVE = 50;
+
+    /**
+     * A modifier to apply to the speed to dampen the speed
+     * being applied to the ball
+     */
+    private const float FORCE_SPEED_RATIO = 1000;
 
     /**
      * The texture to stamp along the path
@@ -23,6 +50,11 @@ public class Ball : MonoBehaviour {
      * The material with the shader for stamping textures
      */
     private Material stampMaterial;
+
+    /**
+     * The ball prefab
+     */
+    private GameObject ballPrefab;
 
     /**
      * List of colors to cycle through
@@ -58,21 +90,86 @@ public class Ball : MonoBehaviour {
     private RaycastHit2D hitInfo;
 
     /**
+     * The current state of the bouncing ball
+     */
+    private EBallState currentState;
+
+    /**
+     * Reference to the current ball on screen
+     */
+    private GameObject ball;
+
+    /**
      * Initialize the ball movement.
      * @param initialVelocity - the initial velocity to give the ball
      * @param paintboardRT - the paint board render texture to draw to
      * @param stampTexture - the texture to stamp along the path
      */
-    public void Init(Vector2 velocity, RenderTexture paintBoardRT, Texture2D stampTexture) {
-        this.paintBoardRT = paintBoardRT;
-        this.stampTexture = stampTexture;
-        this.velocity = velocity;
-
+    public override void Init(RenderTexture paintBoardRT) {
+        base.Init(paintBoardRT);
         stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
+        ballPrefab = Resources.Load<GameObject>("Prefabs/Ball");
+        stampTexture = Resources.Load<Texture2D>("Textures/Ball");
+    }
 
-        previousDrawPos = transform.position;
-        distancePerStep = this.velocity.magnitude / STEPS_PER_INTERVAL;
-        UpdateVelocityInfo(transform.position);
+    /**
+     * Take note of the starting position, and wait until the user
+     * moves a certain distance before starting the brush.
+     * @param position
+     */
+    public override void OnInputStart(Vector3 position) {
+        base.OnInputStart(position);
+        currentState = EBallState.InputStarted;
+    }
+
+    /**
+     * Check if the ball should start moving on screen and start it. If it's already
+     * moving do nothing.
+     * @param position
+     */
+    public override void OnInputMove(Vector3 position) {
+        base.OnInputMove(position);
+        if (currentState != EBallState.InputStarted) {
+            return;
+        }
+
+        // Check if input has moved outside the desired bounds
+        float distance = Mathf.Abs(Vector2.Distance(inputStartPosition, position));
+        if (distance < DISTANCE_TO_MOVE) {
+            return;
+        }
+
+        currentState = EBallState.Started;
+
+        // Create the ball
+        Vector2 startPos = Camera.main.ScreenToWorldPoint(inputStartPosition);
+        ball = Object.Instantiate(
+            ballPrefab,
+            startPos,
+            Quaternion.identity
+        );
+
+        // The speed in pixels the mouse is moving as it crosses the threshold
+        float speed = Mathf.Abs(Vector2.Distance(previousInputPosition, position)) / Time.deltaTime;
+
+        // Initialize the ball with an intial velocity
+        velocity = (position - inputStartPosition) * (speed / Utils.PIXELS_PER_UNIT) * (1 / FORCE_SPEED_RATIO);
+
+        previousDrawPos = ball.transform.position;
+        distancePerStep = velocity.magnitude / STEPS_PER_INTERVAL;
+        UpdateVelocityInfo(ball.transform.position);
+    }
+
+    /**
+     * Called when the user lets go of their input.
+     * @param position
+     */
+    public override void OnInputEnd(Vector3 position) {
+        if (ball) {
+            Object.Destroy(ball);
+        }
+
+        currentState = EBallState.NotStarted;
     }
 
     /**
@@ -104,8 +201,10 @@ public class Ball : MonoBehaviour {
     /**
      * Draw the next batch of dots.
      */
-    private void FixedUpdate() {
-        DrawDots();
+    public override void FixedUpdate() {
+        if (currentState == EBallState.Started) {
+            DrawDots();
+        }
     }
 
     /**
