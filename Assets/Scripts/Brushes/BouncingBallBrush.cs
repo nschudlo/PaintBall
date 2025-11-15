@@ -222,19 +222,21 @@ public class BouncingBallBrush : BaseBrush {
             (int)(pos.x * paintBoardRT.width / paintBoardTransform.rect.width),
             (int)(pos.y * paintBoardRT.height / paintBoardTransform.rect.height)
         );
-        StampTextureToRenderTexture(paintBoardRT, stampTexture, rtPos, stampMaterial, new Vector2(DRAW_SIZE, DRAW_SIZE), color);
+        StampTextureToRenderTexture(paintBoardRT, stampTexture, rtPos, stampMaterial, DRAW_SIZE, DRAW_SIZE, color);
     }
 
     /**
-     * Stamps a texture onto a render texture at a given x, y coordinate
+     * Stamps a texture onto a render texture at a given x, y coordinate, where 0,0
+     * is the bottom right corner of the render texture
      * @param renderTexture - the target render texture
      * @param stampTexture - the texture to stamp
      * @param positionPixels - the position to place the stamp
      * @param stampMat - the material used to stamp
-     * @param targetSize - the target size of the texture
+     * @param stampWidth - the width to stamp the stampTexture
+     * @param stampHeight - the height to stamp the stampTexture
      * @param color - color to apply to the stamp
      */
-    public void StampTextureToRenderTexture(RenderTexture renderTexture, Texture2D stampTexture, Vector2 positionPixels, Material stampMat, Vector2 targetSize, Color color) {
+    public void StampTextureToRenderTexture(RenderTexture renderTexture, Texture2D stampTexture, Vector2 positionPixels, Material stampMat, int stampWidth, int stampHeight, Color color) {
         stampMat.SetTexture("_StampTex", stampTexture);
 
         // Position must be converted to UV space (0 to 1)
@@ -245,8 +247,8 @@ public class BouncingBallBrush : BaseBrush {
         stampMat.SetVector("_StampPositionUV", positionUV);
 
         // Pass the size of the circle for the shader to use
-        stampMat.SetFloat("_StampWidthPixels", targetSize.x);
-        stampMat.SetFloat("_StampHeightPixels", targetSize.y);
+        stampMat.SetFloat("_StampWidthPixels", stampWidth);
+        stampMat.SetFloat("_StampHeightPixels", stampHeight);
 
         stampMat.SetColor("_StampColor", color);
 
