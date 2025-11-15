@@ -39,7 +39,12 @@ public class BouncingBallBrush : BaseBrush {
      * A modifier to apply to the speed to dampen the speed
      * being applied to the ball
      */
-    private const float FORCE_SPEED_RATIO = 1000;
+    private const float FORCE_SPEED_RATIO = 5000;
+
+    /**
+     * The size to stamp the ball
+     */
+    private const int DRAW_SIZE = 28;
 
     /**
      * The texture to stamp along the path
@@ -50,11 +55,6 @@ public class BouncingBallBrush : BaseBrush {
      * The material with the shader for stamping textures
      */
     private Material stampMaterial;
-
-    /**
-     * The ball prefab
-     */
-    private GameObject ballPrefab;
 
     /**
      * List of colors to cycle through
@@ -95,20 +95,14 @@ public class BouncingBallBrush : BaseBrush {
     private EBallState currentState;
 
     /**
-     * Reference to the current ball on screen
-     */
-    private GameObject ball;
-
-    /**
      * Initialize the ball movement.
      * @param initialVelocity - the initial velocity to give the ball
      * @param paintboardRT - the paint board render texture to draw to
      * @param stampTexture - the texture to stamp along the path
      */
-    public override void Init(RenderTexture paintBoardRT) {
-        base.Init(paintBoardRT);
+    public override void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform) {
+        base.Init(paintBoardRT, paintBoardTransform);
         stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
-        ballPrefab = Resources.Load<GameObject>("Prefabs/Ball");
         stampTexture = Resources.Load<Texture2D>("Textures/Ball");
     }
 
@@ -117,8 +111,7 @@ public class BouncingBallBrush : BaseBrush {
      * moves a certain distance before starting the brush.
      * @param position
      */
-    public override void OnInputStart(Vector3 position) {
-        base.OnInputStart(position);
+    public override void OnInputStart() {
         currentState = EBallState.InputStarted;
     }
 
@@ -127,48 +120,35 @@ public class BouncingBallBrush : BaseBrush {
      * moving do nothing.
      * @param position
      */
-    public override void OnInputMove(Vector3 position) {
-        base.OnInputMove(position);
+    public override void OnInputMove() {
         if (currentState != EBallState.InputStarted) {
             return;
         }
 
         // Check if input has moved outside the desired bounds
-        float distance = Mathf.Abs(Vector2.Distance(inputStartPosition, position));
+        float distance = Mathf.Abs(Vector2.Distance(inputStartPosition, currentInputPosition));
         if (distance < DISTANCE_TO_MOVE) {
             return;
         }
 
-        currentState = EBallState.Started;
-
-        // Create the ball
-        Vector2 startPos = Camera.main.ScreenToWorldPoint(inputStartPosition);
-        ball = Object.Instantiate(
-            ballPrefab,
-            startPos,
-            Quaternion.identity
-        );
-
         // The speed in pixels the mouse is moving as it crosses the threshold
-        float speed = Mathf.Abs(Vector2.Distance(previousInputPosition, position)) / Time.deltaTime;
+        float inputSpeed = Mathf.Abs(Vector2.Distance(previousInputPosition, currentInputPosition)) / Time.deltaTime;
 
         // Initialize the ball with an intial velocity
-        velocity = (position - inputStartPosition) * (speed / Utils.PIXELS_PER_UNIT) * (1 / FORCE_SPEED_RATIO);
-
-        previousDrawPos = ball.transform.position;
+        velocity = (currentInputPosition - inputStartPosition) * (inputSpeed / FORCE_SPEED_RATIO);
+        
+        previousDrawPos = inputStartPosition;
         distancePerStep = velocity.magnitude / STEPS_PER_INTERVAL;
-        UpdateVelocityInfo(ball.transform.position);
+        UpdateVelocityInfo(inputStartPosition);
+
+        currentState = EBallState.Started;
     }
 
     /**
      * Called when the user lets go of their input.
      * @param position
      */
-    public override void OnInputEnd(Vector3 position) {
-        if (ball) {
-            Object.Destroy(ball);
-        }
-
+    public override void OnInputEnd() {
         currentState = EBallState.NotStarted;
     }
 
@@ -181,7 +161,7 @@ public class BouncingBallBrush : BaseBrush {
         this.startPos = startPos;
 
         Collider2D prevCollider = null;
-        if (hitInfo) {
+        if (currentState == EBallState.Started) {
             // Determine the new reflected velocity
             velocity = Vector2.Reflect(velocity, hitInfo.normal);
 
@@ -237,12 +217,12 @@ public class BouncingBallBrush : BaseBrush {
      * @param color
      */
     private void DrawDot(Vector2 pos, Color color) {
-        // Get the ball position on the paint layer
-        Vector2 ballPos = Camera.main.WorldToScreenPoint(pos);
-        int ballX = (int)(ballPos.x * paintBoardRT.width / Camera.main.pixelWidth);
-        int ballY = (int)(ballPos.y * paintBoardRT.height / Camera.main.pixelHeight);
-
-        StampTextureToRenderTexture(paintBoardRT, stampTexture, new Vector2(ballX, ballY), stampMaterial, new Vector2(27, 27), color);
+        // Get the position on the paint board layer
+        Vector2 rtPos = new Vector2(
+            (int)(pos.x * paintBoardRT.width / paintBoardTransform.rect.width),
+            (int)(pos.y * paintBoardRT.height / paintBoardTransform.rect.height)
+        );
+        StampTextureToRenderTexture(paintBoardRT, stampTexture, rtPos, stampMaterial, new Vector2(DRAW_SIZE, DRAW_SIZE), color);
     }
 
     /**
@@ -265,7 +245,6 @@ public class BouncingBallBrush : BaseBrush {
         stampMat.SetVector("_StampPositionUV", positionUV);
 
         // Pass the size of the circle for the shader to use
-        // TODO fix this so the circle is the same size as the physics ball
         stampMat.SetFloat("_StampWidthPixels", targetSize.x);
         stampMat.SetFloat("_StampHeightPixels", targetSize.y);
 

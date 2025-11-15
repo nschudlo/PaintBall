@@ -7,26 +7,47 @@ public abstract class BaseBrush : IBrush {
     /// <summary>
     /// Reference to the render texture being painted on
     /// </summary>
-    protected RenderTexture paintBoardRT;
+    protected RenderTexture paintBoardRT {
+        get { return _paintBoardRT; }
+    }
+    private RenderTexture _paintBoardRT;
+
+    /// <summary>
+    /// Reference to the paint board rect transform
+    /// </summary>
+    protected RectTransform paintBoardTransform {
+        get { return _paintBoardTransform; }
+    }
+    private RectTransform _paintBoardTransform;
 
     /// <summary>
     /// The start position of the user input
     /// </summary>
-    protected Vector3 inputStartPosition;
+    protected Vector3 inputStartPosition {
+        get { return _inputStartPosition; }
+    }
+    private Vector3 _inputStartPosition;
 
     /// <summary>
     /// The current position of the input
     /// </summary>
-    protected Vector3 currentInputPosition;
+    protected Vector3 currentInputPosition {
+        get { return _currentInputPosition; }
+    }
+    private Vector3 _currentInputPosition;
 
     /// <summary>
     /// The previous input position
     /// </summary>
-    protected Vector3 previousInputPosition;
+    protected Vector3 previousInputPosition {
+        get { return _previousInputPosition; }
+    }
+    private Vector3 _previousInputPosition;
 
     /// <inheritdoc/>
-    public virtual void Init(RenderTexture paintBoardRT) {
-        this.paintBoardRT = paintBoardRT;
+    public virtual void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform) {
+        _paintBoardRT = paintBoardRT;
+        _paintBoardTransform = paintBoardTransform;
     }
 
     /// <inheritdoc/>
@@ -34,19 +55,27 @@ public abstract class BaseBrush : IBrush {
     }
 
     /// <inheritdoc/>
-    public virtual void OnInputStart(Vector3 position) {
-        inputStartPosition = position;
-        currentInputPosition = position;
-        previousInputPosition = position;
+    public virtual void OnInputStart() {
     }
 
     /// <inheritdoc/>
-    public virtual void OnInputMove(Vector3 position) {
-        previousInputPosition = currentInputPosition;
-        currentInputPosition = position;
+    public virtual void UpdateInputStartPosition(Vector3 position) {
+        _inputStartPosition = position;
+        _currentInputPosition = position;
+        _previousInputPosition = position;
     }
 
     /// <inheritdoc/>
-    public virtual void OnInputEnd(Vector3 position) {
+    public virtual void OnInputMove() {
+    }
+
+    /// <inheritdoc/>
+    public virtual void UpdateInputCurrentPosition(Vector3 position) {
+        _previousInputPosition = currentInputPosition;
+        _currentInputPosition = position;
+    }
+
+    /// <inheritdoc/>
+    public virtual void OnInputEnd() {
     }
 }

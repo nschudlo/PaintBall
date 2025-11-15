@@ -9,7 +9,8 @@ public interface IBrush {
     /// Initialization function
     /// </summary>
     /// <param name="paintBoardRT">The render texture to paint on</param>
-    void Init(RenderTexture paintBoardRT);
+    /// <param name="paintBoardTransform">The rect transform of the paint board</param>
+    void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform);
 
     /// <summary>
     /// Run updates at a fixed interval.
@@ -17,20 +18,33 @@ public interface IBrush {
     void FixedUpdate();
 
     /// <summary>
+    /// Update the start input position. Called by the manager when the an
+    /// input starts on the paint board. 
+    /// </summary>
+    /// <param name="position">The input start coordinates, where 0,0 is
+    /// the bottom left of the paint board</param>
+    void UpdateInputStartPosition(Vector3 position);
+
+    /// <summary>
     /// What to do with this brush when the user starts an input
     /// </summary>
-    /// <param name="position">The position of the input</param>
-    void OnInputStart(Vector3 position);
+    void OnInputStart();
+
+    /// <summary>
+    /// Update the current input position. Called by the manager when an
+    /// input is in progress and the pointer moves.
+    /// </summary>
+    /// <param name="position">The current input coordinates, where 0,0 is the
+    /// bottom left of the paint board</param>
+    void UpdateInputCurrentPosition(Vector3 position);
 
     /// <summary>
     /// What to do with this brush when the user moves after starting an input
     /// </summary>
-    /// <param name="position">The new position input position</param>
-    void OnInputMove(Vector3 position);
+    void OnInputMove();
 
     /// <summary>
     /// What to do with this brush when the user ends an input
     /// </summary>
-    /// <param name="position">The position the input ended</param>
-    void OnInputEnd(Vector3 position);
+    void OnInputEnd();
 }
