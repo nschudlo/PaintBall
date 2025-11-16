@@ -88,9 +88,6 @@ public class Manager : MonoBehaviour {
 
         // Remove instructions so they aren't always there
         Invoke("RemoveInstructions", 10);
-
-        // Setup the initial brush
-        SelectBrush(new BouncingBallBrush());
     }
 
     /**
@@ -142,6 +139,10 @@ public class Manager : MonoBehaviour {
      * Hook up the brush class with the FixedUpdate lifecycle event
      */
     void FixedUpdate() {
+        if (currentBrush == null) {
+            // Setup the initial brush
+            SelectBrush(new BouncingBallBrush());
+        }
         currentBrush.FixedUpdate();
     }
 
