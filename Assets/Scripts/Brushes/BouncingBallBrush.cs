@@ -105,7 +105,7 @@ public class BouncingBallBrush : BaseBrush {
      * moves a certain distance before starting the brush.
      * @param position
      */
-    public override void OnInputStart() {
+    protected override void OnInputStart() {
         currentState = EBallState.InputStarted;
     }
 
@@ -114,7 +114,7 @@ public class BouncingBallBrush : BaseBrush {
      * moving do nothing.
      * @param position
      */
-    public override void OnInputMove() {
+    protected override void OnInputMove() {
         if (currentState != EBallState.InputStarted) {
             return;
         }
@@ -141,10 +141,10 @@ public class BouncingBallBrush : BaseBrush {
     }
 
     /**
-     * Called when the user lets go of their input.
+     * Called when the user stops the input.
      * @param position
      */
-    public override void OnInputEnd() {
+    protected override void OnInputEnd() {
         currentState = EBallState.NotStarted;
     }
 

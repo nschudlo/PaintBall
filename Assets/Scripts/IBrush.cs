@@ -29,12 +29,7 @@ public interface IBrush {
     /// </summary>
     /// <param name="position">The input start coordinates, where 0,0 is
     /// the bottom left of the paint board</param>
-    void UpdateInputStartPosition(Vector3 position);
-
-    /// <summary>
-    /// What to do with this brush when the user starts an input
-    /// </summary>
-    void OnInputStart();
+    void StartInput(Vector3 position);
 
     /// <summary>
     /// Update the current input position. Called by the manager when an
@@ -42,15 +37,10 @@ public interface IBrush {
     /// </summary>
     /// <param name="position">The current input coordinates, where 0,0 is the
     /// bottom left of the paint board</param>
-    void UpdateInputCurrentPosition(Vector3 position);
-
-    /// <summary>
-    /// What to do with this brush when the user moves after starting an input
-    /// </summary>
-    void OnInputMove();
+    void MoveInput(Vector3 position);
 
     /// <summary>
     /// What to do with this brush when the user ends an input
     /// </summary>
-    void OnInputEnd();
+    void EndInput();
 }

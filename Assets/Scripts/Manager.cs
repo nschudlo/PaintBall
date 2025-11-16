@@ -140,8 +140,8 @@ public class Manager : MonoBehaviour {
      */
     void FixedUpdate() {
         if (currentBrush == null) {
-            // Setup the initial brush
             SelectBrush(new BouncingBallBrush());
+            // SelectBrush(new PaintBrush());
         }
         currentBrush.FixedUpdate();
     }
@@ -155,36 +155,32 @@ public class Manager : MonoBehaviour {
         }
 
         if (Input.GetKeyDown(KeyCode.R)) {
-            currentBrush.UpdateInputStartPosition(new Vector3(445, 384, 0));
-            currentBrush.OnInputStart();
-            currentBrush.UpdateInputCurrentPosition(new Vector3(468, 355, 0));
-            currentBrush.UpdateInputCurrentPosition(new Vector3(487, 340, 0));
-            currentBrush.OnInputMove();
+            currentBrush.StartInput(new Vector3(445, 384, 0));
+            currentBrush.MoveInput(new Vector3(468, 355, 0));
+            currentBrush.MoveInput(new Vector3(487, 340, 0));
         }
 
         if (Input.GetKeyUp(KeyCode.R)) {
-            currentBrush.OnInputEnd();
+            currentBrush.EndInput();
         }
 
         // Tell the brush the mouse was clicked
         if (Input.GetKeyDown(KeyCode.Mouse0)) {
             Vector2? pos = getMousePosOnPaintBoard();
             if (pos != null) {
-                currentBrush.UpdateInputStartPosition((Vector2) pos);
-                currentBrush.OnInputStart();
+                currentBrush.StartInput((Vector2) pos);
             }
 
         // Tell the brush the mouse was moved
         } else if (Input.GetKey(KeyCode.Mouse0)) {
             Vector2? pos = getMousePosOnPaintBoard();
             if (pos != null) {
-                currentBrush.UpdateInputCurrentPosition((Vector2) pos);
-                currentBrush.OnInputMove();
+                currentBrush.MoveInput((Vector2) pos);
             }
 
         // Tell the brush the mouse was released
         } else if (Input.GetKeyUp(KeyCode.Mouse0)) {
-            currentBrush.OnInputEnd();
+            currentBrush.EndInput();
         }
     }
 
