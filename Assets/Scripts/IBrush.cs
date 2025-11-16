@@ -10,7 +10,8 @@ public interface IBrush {
     /// </summary>
     /// <param name="paintBoardRT">The render texture to paint on</param>
     /// <param name="paintBoardTransform">The rect transform of the paint board</param>
-    void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform);
+    /// <param name="boundaryMask">A layer mask for the boundary edge colliders</param>
+    void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask);
 
     /// <summary>
     /// Run updates at a fixed interval.

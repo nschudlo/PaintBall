@@ -79,15 +79,15 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _StampHeightPixels: 27
+    - _StampHeightPixels: 28
     - _StampSizePixels: 27
-    - _StampWidthPixels: 27
+    - _StampWidthPixels: 28
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _StampColor: {r: 1, g: 0, b: 1, a: 1}
-    - _StampPositionUV: {r: 0.48236415, g: 0.5105263, b: 0, a: 0}
+    - _StampColor: {r: 1, g: 0, b: 0, a: 1}
+    - _StampPositionUV: {r: 0.69780743, g: 0.040350877, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

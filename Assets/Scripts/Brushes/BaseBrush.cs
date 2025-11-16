@@ -21,6 +21,14 @@ public abstract class BaseBrush : IBrush {
     private RectTransform _paintBoardTransform;
 
     /// <summary>
+    /// Reference to a layer mask to filter for the boundary edge colliders
+    /// </summary>
+    protected LayerMask boundaryMask {
+        get { return _boundaryMask; }
+    }
+    private LayerMask _boundaryMask;
+
+    /// <summary>
     /// The start position of the user input
     /// </summary>
     protected Vector3 inputStartPosition {
@@ -45,9 +53,10 @@ public abstract class BaseBrush : IBrush {
     private Vector3 _previousInputPosition;
 
     /// <inheritdoc/>
-    public virtual void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform) {
+    public virtual void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask) {
         _paintBoardRT = paintBoardRT;
         _paintBoardTransform = paintBoardTransform;
+        _boundaryMask = boundaryMask;
     }
 
     /// <inheritdoc/>
@@ -77,5 +86,12 @@ public abstract class BaseBrush : IBrush {
 
     /// <inheritdoc/>
     public virtual void OnInputEnd() {
+    }
+
+    /**
+     * Print a debug log of the current state of the brush input
+     */
+    public void PrintInputDebug() {
+        Debug.Log($"Starting: {inputStartPosition} Previous: {previousInputPosition} Current: {currentInputPosition} TimeDelta: {Time.deltaTime}");
     }
 }

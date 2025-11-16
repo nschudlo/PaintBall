@@ -7,6 +7,11 @@ using UnityEngine.UI;
  */
 public class Manager : MonoBehaviour {
     /**
+     * The tag to apply to all boundary edge colliders
+     */
+    private string BOUNDARY_LAYER_TAG = "Boundary";
+
+    /**
      * The prefab for making new layers
      */
     public GameObject paintBoardLayerPrefab;
@@ -56,20 +61,20 @@ public class Manager : MonoBehaviour {
         float yMax = yMin + paintBoardTransform.rect.height;
 
         // Setup the bounding box
-        GameObject boundingEdges = new GameObject() { name = "Bounding edges" };
-        // GameObject leftEdge = new GameObject() { name = "Edge Collider" };
+        GameObject boundingEdges = new GameObject() {
+            name = "Bounding edges",
+            layer = LayerMask.NameToLayer(BOUNDARY_LAYER_TAG)
+        };
+
         EdgeCollider2D leftEdgeCol = boundingEdges.AddComponent<EdgeCollider2D>();
         leftEdgeCol.SetPoints(new List<Vector2> { new Vector2(xMin, yMin), new Vector2(xMin, yMax) });
 
-        // GameObject rightEdge = new GameObject() { name = "Right Edge" };
         EdgeCollider2D rightEdgeCol = boundingEdges.AddComponent<EdgeCollider2D>();
         rightEdgeCol.SetPoints(new List<Vector2> { new Vector2(xMax, yMin), new Vector2(xMax, yMax) });
         
-        // GameObject topEdge = new GameObject() { name = "Top Edge" };
         EdgeCollider2D topEdgeCol = boundingEdges.AddComponent<EdgeCollider2D>();
         topEdgeCol.SetPoints(new List<Vector2> { new Vector2(xMin, yMax), new Vector2(xMax, yMax) });
         
-        // GameObject bottomEdge = new GameObject() { name = "Bottom Edge" };
         EdgeCollider2D bottomEdgeCol = boundingEdges.AddComponent<EdgeCollider2D>();
         bottomEdgeCol.SetPoints(new List<Vector2> { new Vector2(xMin, yMin), new Vector2(xMax, yMin) });
 
@@ -124,7 +129,11 @@ public class Manager : MonoBehaviour {
         // TODO destroy old brush
 
         currentBrush = brush;
-        currentBrush.Init(currentPaintBoard, paintBoardTransform);
+        currentBrush.Init(
+            currentPaintBoard,
+            paintBoardTransform,
+            LayerMask.GetMask(BOUNDARY_LAYER_TAG)
+        );
     }
 
     /**
@@ -142,9 +151,20 @@ public class Manager : MonoBehaviour {
             ResetPaintLayer();
         }
 
+        if (Input.GetKeyDown(KeyCode.R)) {
+            currentBrush.UpdateInputStartPosition(new Vector3(445, 384, 0));
+            currentBrush.OnInputStart();
+            currentBrush.UpdateInputCurrentPosition(new Vector3(468, 355, 0));
+            currentBrush.UpdateInputCurrentPosition(new Vector3(487, 340, 0));
+            currentBrush.OnInputMove();
+        }
+
+        if (Input.GetKeyUp(KeyCode.R)) {
+            currentBrush.OnInputEnd();
+        }
+
         // Tell the brush the mouse was clicked
         if (Input.GetKeyDown(KeyCode.Mouse0)) {
-
             Vector2? pos = getMousePosOnPaintBoard();
             if (pos != null) {
                 currentBrush.UpdateInputStartPosition((Vector2) pos);

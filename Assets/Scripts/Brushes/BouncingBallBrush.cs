@@ -95,13 +95,13 @@ public class BouncingBallBrush : BaseBrush {
     private EBallState currentState;
 
     /**
-     * Initialize the ball movement.
-     * @param initialVelocity - the initial velocity to give the ball
-     * @param paintboardRT - the paint board render texture to draw to
-     * @param stampTexture - the texture to stamp along the path
+     * Initialize the brush.
+     * @param paintBoardTR
+     * @param paintBoardTransform
+     * @param boundaryMask
      */
-    public override void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform) {
-        base.Init(paintBoardRT, paintBoardTransform);
+    public override void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask) {
+        base.Init(paintBoardRT, paintBoardTransform, boundaryMask);
         stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
         stampTexture = Resources.Load<Texture2D>("Textures/Ball");
     }
@@ -130,6 +130,8 @@ public class BouncingBallBrush : BaseBrush {
         if (distance < DISTANCE_TO_MOVE) {
             return;
         }
+
+        PrintInputDebug();
 
         // The speed in pixels the mouse is moving as it crosses the threshold
         float inputSpeed = Mathf.Abs(Vector2.Distance(previousInputPosition, currentInputPosition)) / Time.deltaTime;
@@ -171,7 +173,7 @@ public class BouncingBallBrush : BaseBrush {
             prevCollider.enabled = false;
         }
 
-        hitInfo = Physics2D.Raycast(startPos, velocity);
+        hitInfo = Physics2D.Raycast(startPos, velocity, Mathf.Infinity, boundaryMask);
 
         if (prevCollider) {
             prevCollider.enabled = true;
