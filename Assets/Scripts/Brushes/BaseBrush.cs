@@ -60,6 +60,10 @@ public abstract class BaseBrush : IBrush {
     }
 
     /// <inheritdoc/>
+    public virtual void CleanUp() {
+    }
+
+    /// <inheritdoc/>
     public virtual void FixedUpdate() {
     }
 

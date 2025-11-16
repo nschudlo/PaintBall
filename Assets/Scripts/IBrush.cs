@@ -14,6 +14,11 @@ public interface IBrush {
     void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask);
 
     /// <summary>
+    /// Clean up the brush
+    /// </summary>
+    void CleanUp();
+
+    /// <summary>
     /// Run updates at a fixed interval.
     /// </summary>
     void FixedUpdate();

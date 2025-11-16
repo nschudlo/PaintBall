@@ -126,7 +126,9 @@ public class Manager : MonoBehaviour {
      * @param brush
      */
     private void SelectBrush(IBrush brush) {
-        // TODO destroy old brush
+        if (currentBrush != null) {
+            currentBrush.CleanUp();
+        }
 
         currentBrush = brush;
         currentBrush.Init(
