@@ -52,11 +52,6 @@ public class BouncingBallBrush : BaseBrush {
     private Texture2D stampTexture;
 
     /**
-     * The material with the shader for stamping textures
-     */
-    private Material stampMaterial;
-
-    /**
      * List of colors to cycle through
      */
     private readonly Color[] COLOURS = {
@@ -102,7 +97,6 @@ public class BouncingBallBrush : BaseBrush {
      */
     public override void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask) {
         base.Init(paintBoardRT, paintBoardTransform, boundaryMask);
-        stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
         stampTexture = Resources.Load<Texture2D>("Textures/Ball");
     }
 
@@ -224,41 +218,6 @@ public class BouncingBallBrush : BaseBrush {
             (int)(pos.x * paintBoardRT.width / paintBoardTransform.rect.width),
             (int)(pos.y * paintBoardRT.height / paintBoardTransform.rect.height)
         );
-        StampTextureToRenderTexture(paintBoardRT, stampTexture, rtPos, stampMaterial, DRAW_SIZE, DRAW_SIZE, color);
-    }
-
-    /**
-     * Stamps a texture onto a render texture at a given x, y coordinate, where 0,0
-     * is the bottom right corner of the render texture
-     * @param renderTexture - the target render texture
-     * @param stampTexture - the texture to stamp
-     * @param positionPixels - the position to place the stamp
-     * @param stampMat - the material used to stamp
-     * @param stampWidth - the width to stamp the stampTexture
-     * @param stampHeight - the height to stamp the stampTexture
-     * @param color - color to apply to the stamp
-     */
-    public void StampTextureToRenderTexture(RenderTexture renderTexture, Texture2D stampTexture, Vector2 positionPixels, Material stampMat, int stampWidth, int stampHeight, Color color) {
-        stampMat.SetTexture("_StampTex", stampTexture);
-
-        // Position must be converted to UV space (0 to 1)
-        Vector2 positionUV = new Vector2(
-            positionPixels.x / renderTexture.width,
-            positionPixels.y / renderTexture.height
-        );
-        stampMat.SetVector("_StampPositionUV", positionUV);
-
-        // Pass the size of the circle for the shader to use
-        stampMat.SetFloat("_StampWidthPixels", stampWidth);
-        stampMat.SetFloat("_StampHeightPixels", stampHeight);
-
-        stampMat.SetColor("_StampColor", color);
-
-        // Use the custom material/shader to stamp the circle onto the buffer
-        RenderTexture tempRT = RenderTexture.GetTemporary(renderTexture.width, renderTexture.height, 0, renderTexture.format);
-        Graphics.Blit(renderTexture, tempRT);
-        Graphics.Blit(tempRT, renderTexture, stampMat);
-
-        RenderTexture.ReleaseTemporary(tempRT);
+        StampTextureToRenderTexture(stampTexture, rtPos, DRAW_SIZE, DRAW_SIZE, color);
     }
 }

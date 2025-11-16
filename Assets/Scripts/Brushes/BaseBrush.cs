@@ -52,11 +52,18 @@ public abstract class BaseBrush : IBrush {
     }
     private Vector3 _previousInputPosition;
 
+    /**
+     * The material with the shader for stamping textures
+     */
+    private Material _stampMaterial;
+
     /// <inheritdoc/>
     public virtual void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask) {
         _paintBoardRT = paintBoardRT;
         _paintBoardTransform = paintBoardTransform;
         _boundaryMask = boundaryMask;
+
+        _stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
     }
 
     /// <inheritdoc/>
@@ -97,5 +104,38 @@ public abstract class BaseBrush : IBrush {
      */
     public void PrintInputDebug() {
         Debug.Log($"Starting: {inputStartPosition} Previous: {previousInputPosition} Current: {currentInputPosition} TimeDelta: {Time.deltaTime}");
+    }
+
+    /**
+     * Stamps a texture onto a render texture at a given x, y coordinate, where 0,0
+     * is the bottom right corner of the render texture
+     * @param stampTexture - the texture to stamp
+     * @param positionPixels - the position to place the stamp
+     * @param stampWidth - the width to stamp the stampTexture
+     * @param stampHeight - the height to stamp the stampTexture
+     * @param color - color to apply to the stamp
+     */
+    public void StampTextureToRenderTexture(Texture2D stampTexture, Vector2 positionPixels, int stampWidth, int stampHeight, Color color) {
+        _stampMaterial.SetTexture("_StampTex", stampTexture);
+
+        // Position must be converted to UV space (0 to 1)
+        Vector2 positionUV = new Vector2(
+            positionPixels.x / _paintBoardRT.width,
+            positionPixels.y / _paintBoardRT.height
+        );
+        _stampMaterial.SetVector("_StampPositionUV", positionUV);
+
+        // Pass the size of the circle for the shader to use
+        _stampMaterial.SetFloat("_StampWidthPixels", stampWidth);
+        _stampMaterial.SetFloat("_StampHeightPixels", stampHeight);
+
+        _stampMaterial.SetColor("_StampColor", color);
+
+        // Use the custom material/shader to stamp the circle onto the buffer
+        RenderTexture tempRT = RenderTexture.GetTemporary(_paintBoardRT.width, _paintBoardRT.height, 0, _paintBoardRT.format);
+        Graphics.Blit(_paintBoardRT, tempRT);
+        Graphics.Blit(tempRT, _paintBoardRT, _stampMaterial);
+
+        RenderTexture.ReleaseTemporary(tempRT);
     }
 }
