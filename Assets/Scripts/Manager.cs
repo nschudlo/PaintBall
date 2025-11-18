@@ -140,8 +140,8 @@ public class Manager : MonoBehaviour {
      */
     void FixedUpdate() {
         if (currentBrush == null) {
-            SelectBrush(new BouncingBallBrush());
-            // SelectBrush(new PaintBrush());
+            // SelectBrush(new BouncingBallBrush());
+            SelectBrush(new PaintBrush());
         }
         currentBrush.FixedUpdate();
     }

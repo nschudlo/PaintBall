@@ -93,7 +93,7 @@ public class BouncingBallBrush : BaseBrush {
      * Initialize the brush resouces
      */
     public override void OnInit() {
-        stampTexture = Resources.Load<Texture2D>("Textures/Ball");
+        stampTexture = Resources.Load<Texture2D>("Textures/Circle");
     }
 
     /**
