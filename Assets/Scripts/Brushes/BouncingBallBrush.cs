@@ -90,13 +90,9 @@ public class BouncingBallBrush : BaseBrush {
     private EBallState currentState;
 
     /**
-     * Initialize the brush.
-     * @param paintBoardTR
-     * @param paintBoardTransform
-     * @param boundaryMask
+     * Initialize the brush resouces
      */
-    public override void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask) {
-        base.Init(paintBoardRT, paintBoardTransform, boundaryMask);
+    public override void OnInit() {
         stampTexture = Resources.Load<Texture2D>("Textures/Ball");
     }
 

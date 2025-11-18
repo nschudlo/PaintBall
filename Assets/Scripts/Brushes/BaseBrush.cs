@@ -51,6 +51,13 @@ public abstract class BaseBrush : IBrush {
         this.boundaryMask = boundaryMask;
 
         stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
+        OnInit();
+    }
+
+    /// <summary>
+    /// Called after the brush has been initialized
+    /// </summary>
+    public virtual void OnInit() {
     }
 
     /// <inheritdoc/>
