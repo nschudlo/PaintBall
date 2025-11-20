@@ -214,6 +214,6 @@ public class BouncingBallBrush : BrushBase {
             (int)(pos.x * paintBoardRT.width / paintBoardTransform.rect.width),
             (int)(pos.y * paintBoardRT.height / paintBoardTransform.rect.height)
         );
-        StampTextureToRenderTexture(stampTexture, rtPos, DRAW_SIZE, DRAW_SIZE, color);
+        StampTextureToRenderTexture(stampTexture, rtPos, DRAW_SIZE, DRAW_SIZE, color, 0);
     }
 }

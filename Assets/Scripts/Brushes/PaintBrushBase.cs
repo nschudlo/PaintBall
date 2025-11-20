@@ -11,22 +11,22 @@ public class PaintBrushBase : BrushBase {
     /**
      * The default size of the circle
      */
-    private readonly int DEFAULT_SIZE = 15;
-
-    /**
-     * The name of the texture resource to stamp along the input path
-     */
-    protected readonly string STAMP_RESOURCE = "Textures/Circle";
+    protected int size = 15;
 
     /**
      * The frequency to stamp the texture
      */
-    protected readonly int DRAW_DISTANCE = 1;
+    protected int drawDistance = 1;
+
+    /**
+     * Rotation angle to apply to the stamp
+     */
+    protected float rotation = 0;
 
     /**
      * The texture to stamp along the path
      */
-    private Texture2D stampTexture;
+    protected Texture2D texture;
 
     /**
      * The previous location that was drawn to
@@ -37,14 +37,16 @@ public class PaintBrushBase : BrushBase {
      * Initialize the brush resouces
      */
     public override void OnInit() {
-        stampTexture = Resources.Load<Texture2D>(STAMP_RESOURCE);
+        if (texture == null) {
+            texture = Resources.Load<Texture2D>("Textures/Circle");
+        }
     }
 
     /**
      * Draw a single shape to the screen
      */
     protected override void OnInputStart() {
-        StampTextureToRenderTexture(stampTexture, currentInputPosition, DEFAULT_SIZE, DEFAULT_SIZE, Color.white);
+        StampTextureToRenderTexture(texture, currentInputPosition, size, size, Color.white, rotation);
         previousDrawLocation = currentInputPosition;
     }
 
@@ -58,11 +60,11 @@ public class PaintBrushBase : BrushBase {
 
         Vector2 direction = (Vector2)currentInputPosition - previousDrawLocation;
         float distanceRemaining = direction.magnitude;
-        while (distanceRemaining > DRAW_DISTANCE) {
-            Vector2 pos = previousDrawLocation + (direction.normalized * DRAW_DISTANCE);
-            StampTextureToRenderTexture(stampTexture, pos, DEFAULT_SIZE, DEFAULT_SIZE, Color.white);
+        while (distanceRemaining > drawDistance) {
+            Vector2 pos = previousDrawLocation + (direction.normalized * drawDistance);
+            StampTextureToRenderTexture(texture, pos, size, size, Color.white, rotation);
             previousDrawLocation = pos;
-            distanceRemaining -= DRAW_DISTANCE;
+            distanceRemaining -= drawDistance;
         }
     }
 }

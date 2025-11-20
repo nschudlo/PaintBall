@@ -38,11 +38,16 @@ public abstract class BrushBase : IBrush {
     /// Flag to indicate the 
     /// </summary>
     protected bool inputStarted { get; private set; }
-    
-    /**
-     * The material with the shader for stamping textures
-     */
+
+    /// <summary>
+    /// The material with the shader for stamping textures
+    /// </summary>
     private Material stampMaterial;
+    
+    /// <summary>
+    /// The material with the shader for stamping with a rotation
+    /// </summary>
+    private Material stampMaterialWithRotation;
 
     /// <inheritdoc/>
     public virtual void Init(RenderTexture paintBoardRT, RectTransform paintBoardTransform, LayerMask boundaryMask) {
@@ -51,6 +56,7 @@ public abstract class BrushBase : IBrush {
         this.boundaryMask = boundaryMask;
 
         stampMaterial = Resources.Load<Material>("Shaders/StampBlit");
+        stampMaterialWithRotation = Resources.Load<Material>("Shaders/StampBlitWithRotation");
         OnInit();
     }
 
@@ -120,27 +126,35 @@ public abstract class BrushBase : IBrush {
      * @param stampWidth - the width to stamp the stampTexture
      * @param stampHeight - the height to stamp the stampTexture
      * @param color - color to apply to the stamp
+     * @param rotationAngle - rotation angle
      */
-    public void StampTextureToRenderTexture(Texture2D stampTexture, Vector2 positionPixels, int stampWidth, int stampHeight, Color color) {
-        stampMaterial.SetTexture("_StampTex", stampTexture);
+    public void StampTextureToRenderTexture(Texture2D stampTexture, Vector2 positionPixels, int stampWidth, int stampHeight, Color color, float rotationAngle) {
+        Material material = rotationAngle > 0 ? stampMaterialWithRotation : stampMaterial;
+
+        material.SetTexture("_StampTex", stampTexture);
 
         // Position must be converted to UV space (0 to 1)
         Vector2 positionUV = new Vector2(
             positionPixels.x / paintBoardRT.width,
             positionPixels.y / paintBoardRT.height
         );
-        stampMaterial.SetVector("_StampPositionUV", positionUV);
+        material.SetVector("_StampPositionUV", positionUV);
 
         // Pass the size of the circle for the shader to use
-        stampMaterial.SetFloat("_StampWidthPixels", stampWidth);
-        stampMaterial.SetFloat("_StampHeightPixels", stampHeight);
+        material.SetFloat("_StampWidthPixels", stampWidth);
+        material.SetFloat("_StampHeightPixels", stampHeight);
 
-        stampMaterial.SetColor("_StampColor", color);
+        material.SetColor("_StampColor", color);
+
+        if (rotationAngle != 0) {
+            float angleRad = rotationAngle * Mathf.Deg2Rad;
+            material.SetVector("_StampRotationSinCos", new Vector4(Mathf.Cos(angleRad), Mathf.Sin(angleRad), 0f, 0f));
+        }
 
         // Use the custom material/shader to stamp the circle onto the buffer
         RenderTexture tempRT = RenderTexture.GetTemporary(paintBoardRT.width, paintBoardRT.height, 0, paintBoardRT.format);
         Graphics.Blit(paintBoardRT, tempRT);
-        Graphics.Blit(tempRT, paintBoardRT, stampMaterial);
+        Graphics.Blit(tempRT, paintBoardRT, material);
 
         RenderTexture.ReleaseTemporary(tempRT);
     }

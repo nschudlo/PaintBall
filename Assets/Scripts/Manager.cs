@@ -141,7 +141,8 @@ public class Manager : MonoBehaviour {
     void FixedUpdate() {
         if (currentBrush == null) {
             // SelectBrush(new BouncingBallBrush());
-            SelectBrush(new PaintBrushBase());
+            // SelectBrush(new PaintBrushBase());
+            SelectBrush(new ArrowStampBrush());
         }
         currentBrush.FixedUpdate();
     }
