@@ -140,9 +140,7 @@ public class Manager : MonoBehaviour {
      */
     void FixedUpdate() {
         if (currentBrush == null) {
-            // SelectBrush(new BouncingBallBrush());
-            // SelectBrush(new PaintBrushBase());
-            SelectBrush(new ArrowStampBrush());
+            SelectBrush(new PaintBrushBase());
         }
         currentBrush.FixedUpdate();
     }
@@ -151,19 +149,7 @@ public class Manager : MonoBehaviour {
      * Listen for mouse interactions
      */
     void Update() {
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            ResetPaintLayer();
-        }
-
-        if (Input.GetKeyDown(KeyCode.R)) {
-            currentBrush.StartInput(new Vector3(445, 384, 0));
-            currentBrush.MoveInput(new Vector3(468, 355, 0));
-            currentBrush.MoveInput(new Vector3(487, 340, 0));
-        }
-
-        if (Input.GetKeyUp(KeyCode.R)) {
-            currentBrush.EndInput();
-        }
+        handleDebugInputs();
 
         // Tell the brush the mouse was clicked
         if (Input.GetKeyDown(KeyCode.Mouse0)) {
@@ -181,6 +167,35 @@ public class Manager : MonoBehaviour {
 
         // Tell the brush the mouse was released
         } else if (Input.GetKeyUp(KeyCode.Mouse0)) {
+            currentBrush.EndInput();
+        }
+    }
+
+    /**
+     * Handle debug input keys
+     */
+    private void handleDebugInputs() {
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            ResetPaintLayer();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+            SelectBrush(new BouncingBallBrush());
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2)) {
+            SelectBrush(new PaintBrushBase());
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3)) {
+            SelectBrush(new ArrowStampBrush());
+        }
+
+        if (Input.GetKeyDown(KeyCode.R)) {
+            currentBrush.StartInput(new Vector3(445, 384, 0));
+            currentBrush.MoveInput(new Vector3(468, 355, 0));
+            currentBrush.MoveInput(new Vector3(487, 340, 0));
+        }
+
+        if (Input.GetKeyUp(KeyCode.R)) {
             currentBrush.EndInput();
         }
     }
