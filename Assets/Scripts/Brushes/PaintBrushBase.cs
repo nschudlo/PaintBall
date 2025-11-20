@@ -7,7 +7,7 @@ using UnityEngine;
  *   DRAW_DISTANCE - the pixels in between the stamps
  *   DEFAULT_SIZE - the default size of the stamp
  */
-public class PaintBrush : BaseBrush {
+public class PaintBrushBase : BrushBase {
     /**
      * The default size of the circle
      */

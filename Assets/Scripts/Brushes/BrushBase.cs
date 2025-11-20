@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// The base brush class
 /// </summary>
-public abstract class BaseBrush : IBrush {
+public abstract class BrushBase : IBrush {
     /// <summary>
     /// Reference to the render texture being painted on
     /// </summary>

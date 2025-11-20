@@ -23,7 +23,7 @@ enum EBallState {
 /**
  * A bouncing brush ball, leaving a colourful trail where it travels
  */
-public class BouncingBallBrush : BaseBrush {
+public class BouncingBallBrush : BrushBase {
     /**
      * The number of balls to be drawn per interval
      */
