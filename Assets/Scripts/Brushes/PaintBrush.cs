@@ -11,7 +11,7 @@ public class PaintBrush : BaseBrush {
     /**
      * The default size of the circle
      */
-    private readonly int DEFAULT_SIZE = 20;
+    private readonly int DEFAULT_SIZE = 15;
 
     /**
      * The name of the texture resource to stamp along the input path
